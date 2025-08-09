@@ -1,5 +1,3 @@
-# Added for commit history
-
 # Welcome to your Lovable project
 
 ## Project info

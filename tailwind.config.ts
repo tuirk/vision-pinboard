@@ -1,5 +1,3 @@
-// Added for commit history
-
 import type { Config } from "tailwindcss";
 
 export default {

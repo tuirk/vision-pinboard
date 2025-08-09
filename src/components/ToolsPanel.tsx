@@ -1,15 +1,8 @@
 
-<<<<<<< HEAD
 import { useRef, useState } from "react";
-=======
-import { useRef } from "react";
->>>>>>> 92b5ec5 (Fix FrameIcon reference)
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext } from "@/contexts/EditorContext";
-<<<<<<< HEAD
 import type { PinColor } from "@/contexts/EditorContext";
-=======
->>>>>>> d453ff0 (Add image cropping shapes)
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -23,7 +16,6 @@ import {
   Circle, 
   Square,
   Scissors,
-<<<<<<< HEAD
   Frame,
   Pin,
   ArrowUp,
@@ -34,24 +26,12 @@ import {
   Type,
   Plus,
   Download
-=======
-  Frame
->>>>>>> d453ff0 (Add image cropping shapes)
 } from "lucide-react";
 import { toast } from "sonner";
 
 export const ToolsPanel = () => {
-<<<<<<< HEAD
   const { uploadedImages, setUploadedImages, setDraggedImage, setDraggedPin } = useImageContext();
   const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer, addText, exportSelected } = useEditorContext();
-=======
-  const { uploadedImages, setUploadedImages, setDraggedImage } = useImageContext();
-<<<<<<< HEAD
-  const { applyShapeCrop } = useEditorContext();
->>>>>>> d453ff0 (Add image cropping shapes)
-=======
-  const { applyShapeCrop, startFreeCut } = useEditorContext();
->>>>>>> ea03ed0 (Add freecut function)
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [textContent, setTextContent] = useState("");
 
@@ -207,11 +187,7 @@ export const ToolsPanel = () => {
         
         <Separator className="my-3" />
         
-<<<<<<< HEAD
         <Button variant="outline" size="sm" className="w-full text-xs" onClick={applyPolaroidFrame}>
-=======
-        <Button variant="outline" size="sm" className="w-full text-xs">
->>>>>>> 92b5ec5 (Fix FrameIcon reference)
           <Frame className="h-3 w-3 mr-1" />
           Polaroid Frame
         </Button>

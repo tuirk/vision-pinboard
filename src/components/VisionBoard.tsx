@@ -25,11 +25,7 @@ export const VisionBoard = () => {
               bg-panel-bg border-r border-panel-border shadow-panel
             `}
           >
-<<<<<<< HEAD
             <div className={`${isPanelOpen ? "panel-slide-in" : "panel-slide-out"} h-full overflow-hidden`}>
-=======
-            <div className={`${isPanelOpen ? "panel-slide-in" : "panel-slide-out"} h-full`}>
->>>>>>> d453ff0 (Add image cropping shapes)
               {isPanelOpen && <ToolsPanel />}
             </div>
           </div>
@@ -41,11 +37,7 @@ export const VisionBoard = () => {
               onClick={togglePanel}
               variant="secondary"
               size="sm"
-<<<<<<< HEAD
               className="absolute top-4 left-4 z-20 shadow-pin hover:shadow-lg transition-all"
-=======
-              className="absolute top-4 left-4 z-10 shadow-pin"
->>>>>>> d453ff0 (Add image cropping shapes)
             >
               {isPanelOpen ? (
                 <PanelLeftClose className="h-4 w-4" />

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from "react";
 
 export type ShapeType = "circle" | "square" | "heart";
@@ -12,23 +11,10 @@ type PinActionFn = (color: PinColor) => void;
 type ReorderLayerFn = (op: ReorderOp) => void;
 type AddTextFn = (text: string) => void;
 type ExportSelectedFn = () => void;
-=======
-import { createContext, useContext, useState, ReactNode } from "react";
-
-export type ShapeType = "circle" | "square" | "heart";
-
-type ApplyShapeFn = (shape: ShapeType) => void;
-<<<<<<< HEAD
->>>>>>> d453ff0 (Add image cropping shapes)
-=======
-type StartFreeCutFn = () => void;
->>>>>>> ea03ed0 (Add freecut function)
 
 interface EditorContextType {
   applyShapeCrop: ApplyShapeFn;
   setApplyShapeCrop: (fn: ApplyShapeFn) => void;
-<<<<<<< HEAD
-<<<<<<< HEAD
   startFreeCut: StartFreeCutFn;
   setStartFreeCut: (fn: StartFreeCutFn) => void;
   applyPolaroidFrame: ApplyPolaroidFn;
@@ -41,27 +27,15 @@ interface EditorContextType {
   setAddText: (fn: AddTextFn) => void;
   exportSelected: ExportSelectedFn;
   setExportSelected: (fn: ExportSelectedFn) => void;
-=======
-  startFreeCut: StartFreeCutFn;
-  setStartFreeCut: (fn: StartFreeCutFn) => void;
->>>>>>> ea03ed0 (Add freecut function)
 }
 
 const noop: ApplyShapeFn = () => {};
 const noopVoid: StartFreeCutFn = () => {};
-<<<<<<< HEAD
 const noopPolaroid: ApplyPolaroidFn = () => {};
 const noopPinAction: PinActionFn = () => {};
 const noopReorder: ReorderLayerFn = () => {};
 const noopAddText: AddTextFn = () => {};
 const noopExportSelected: ExportSelectedFn = () => {};
-=======
-}
-
-const noop: ApplyShapeFn = () => {};
->>>>>>> d453ff0 (Add image cropping shapes)
-=======
->>>>>>> ea03ed0 (Add freecut function)
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
@@ -72,9 +46,7 @@ export const useEditorContext = () => {
 };
 
 export const EditorProvider = ({ children }: { children: ReactNode }) => {
-<<<<<<< HEAD
   const [applyShapeCropFn, setApplyShapeCropFn] = useState<ApplyShapeFn>(() => noop);
-<<<<<<< HEAD
   const [startFreeCutFn, setStartFreeCutFn] = useState<StartFreeCutFn>(() => noopVoid);
   const [applyPolaroidFrameFn, setApplyPolaroidFrameFn] = useState<ApplyPolaroidFn>(() => noopPolaroid);
   const [pinActionFn, setPinActionFn] = useState<PinActionFn>(() => noopPinAction);
@@ -119,22 +91,6 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <EditorContext.Provider value={value}>
-=======
-=======
-const [applyShapeCropFn, setApplyShapeCropFn] = useState<ApplyShapeFn>(() => noop);
-  const [startFreeCutFn, setStartFreeCutFn] = useState<StartFreeCutFn>(() => noopVoid);
->>>>>>> ea03ed0 (Add freecut function)
-
-  return (
-    <EditorContext.Provider
-      value={{
-        applyShapeCrop: (shape) => applyShapeCropFn(shape),
-        setApplyShapeCrop: (fn) => setApplyShapeCropFn(() => fn),
-        startFreeCut: () => startFreeCutFn(),
-        setStartFreeCut: (fn) => setStartFreeCutFn(() => fn),
-      }}
-    >
->>>>>>> d453ff0 (Add image cropping shapes)
       {children}
     </EditorContext.Provider>
   );
