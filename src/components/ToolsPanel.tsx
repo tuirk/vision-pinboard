@@ -19,7 +19,7 @@ import { toast } from "sonner";
 
 export const ToolsPanel = () => {
   const { uploadedImages, setUploadedImages, setDraggedImage } = useImageContext();
-  const { applyShapeCrop } = useEditorContext();
+  const { applyShapeCrop, startFreeCut } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +104,7 @@ export const ToolsPanel = () => {
             <Heart className="h-3 w-3 mr-1" />
             Heart
           </Button>
-          <Button variant="outline" size="sm" className="text-xs">
+          <Button variant="outline" size="sm" className="text-xs" onClick={startFreeCut}>
             <Scissors className="h-3 w-3 mr-1" />
             Free Cut
           </Button>
