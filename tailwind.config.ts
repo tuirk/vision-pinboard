@@ -61,7 +61,31 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				cork: {
+					light: 'hsl(var(--cork-light))',
+					medium: 'hsl(var(--cork-medium))',
+					dark: 'hsl(var(--cork-dark))',
+					shadow: 'hsl(var(--cork-shadow))'
+				},
+				panel: {
+					bg: 'hsl(var(--panel-bg))',
+					border: 'hsl(var(--panel-border))',
+					shadow: 'hsl(var(--panel-shadow))'
 				}
+			},
+			backgroundImage: {
+				'gradient-cork': 'var(--gradient-cork)',
+				'gradient-warm': 'var(--gradient-warm)'
+			},
+			boxShadow: {
+				'pin': 'var(--shadow-pin)',
+				'panel': 'var(--shadow-panel)',
+				'image': 'var(--shadow-image)'
+			},
+			transitionTimingFunction: {
+				'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+				'spring': 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
