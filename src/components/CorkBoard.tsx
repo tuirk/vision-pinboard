@@ -58,7 +58,7 @@ const PIN_COLORS: Record<PinColor, string> = {
 
 
 export const CorkBoard = () => {
-  const { draggedImage, setDraggedImage } = useImageContext();
+  const { draggedImage, setDraggedImage, draggedPin, setDraggedPin } = useImageContext();
   const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
@@ -401,70 +401,79 @@ export const CorkBoard = () => {
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {
     event.preventDefault();
-    console.log("Drop event triggered");
-    
-    if (!fabricCanvas || !draggedImage) {
-      console.log("No canvas or dragged image available");
+    if (!fabricCanvas) return;
+
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Handle pin drop
+    if (draggedPin) {
+      const colorHex = PIN_COLORS[draggedPin];
+      const head = new Circle({ radius: 10, top: -28, fill: colorHex, originX: 'center', originY: 'center' } as any);
+      (head as any).name = 'plastic';
+      const neck = new Rect({ width: 8, height: 24, rx: 4, ry: 4, top: -8, fill: colorHex, originX: 'center', originY: 'center' } as any);
+      (neck as any).name = 'plastic';
+      const base = new Ellipse({ rx: 16, ry: 10, top: 6, fill: colorHex, originX: 'center', originY: 'center' } as any);
+      (base as any).name = 'plastic';
+      const spike = new Triangle({ width: 6, height: 22, top: 22, originX: 'center', originY: 'center', angle: 180, fill: '#c0c0c0' });
+
+      const pinGroup = new Group([spike, base, neck, head], {
+        left: x,
+        top: y,
+        originX: 'center',
+        originY: 'center',
+        shadow: new Shadow({ color: 'rgba(0,0,0,0.25)', blur: 8, offsetX: 2, offsetY: 4 }),
+      } as any);
+      (pinGroup as any).name = 'pin';
+
+      fabricCanvas.add(pinGroup);
+      attachDeleteControl(pinGroup);
+      fabricCanvas.setActiveObject(pinGroup as any);
+      fabricCanvas.requestRenderAll();
+      setDraggedPin(null);
+      toast.success('Pin added');
       return;
     }
 
-    try {
-      console.log("Processing image:", draggedImage.name);
-      
-      // Create image URL
-      const imageUrl = URL.createObjectURL(draggedImage);
-        
-        // Get drop position relative to canvas
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+    // Handle image drop
+    if (!draggedImage) return;
 
-        // Load image and add to canvas
-        FabricImage.fromURL(imageUrl, {
-          crossOrigin: 'anonymous'
-        }).then((img) => {
-          // Scale image to reasonable size
+    try {
+      const imageUrl = URL.createObjectURL(draggedImage);
+
+      FabricImage.fromURL(imageUrl, { crossOrigin: 'anonymous' })
+        .then((img) => {
           const maxSize = 200;
           const scale = Math.min(maxSize / img.width!, maxSize / img.height!);
-          
+
           img.set({
             left: x - (img.width! * scale) / 2,
             top: y - (img.height! * scale) / 2,
             scaleX: scale,
             scaleY: scale,
-            shadow: {
-              color: 'rgba(0,0,0,0.3)',
-              blur: 10,
-              offsetX: 3,
-              offsetY: 3,
-            }
+            shadow: { color: 'rgba(0,0,0,0.3)', blur: 10, offsetX: 3, offsetY: 3 },
           });
 
           attachDeleteControl(img);
-
           fabricCanvas.add(img);
           fabricCanvas.setActiveObject(img);
           fabricCanvas.renderAll();
-          
-          toast.success("Image added to board!");
-          console.log("Image successfully added to canvas");
-          
-          // Clean up
+
+          toast.success('Image added to board!');
           URL.revokeObjectURL(imageUrl);
           setDraggedImage(null);
-          
-        }).catch((error) => {
+        })
+        .catch((error) => {
           console.error('Error loading image:', error);
-          toast.error("Failed to add image to board");
+          toast.error('Failed to add image to board');
           URL.revokeObjectURL(imageUrl);
           setDraggedImage(null);
         });
-        
     } catch (error) {
       console.error('Error handling drop:', error);
-      toast.error("Failed to process dropped item");
+      toast.error('Failed to process dropped item');
       setDraggedImage(null);
     }
   };

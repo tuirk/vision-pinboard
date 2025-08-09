@@ -2,6 +2,7 @@
 import { useRef } from "react";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext } from "@/contexts/EditorContext";
+import type { PinColor } from "@/contexts/EditorContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -19,8 +20,8 @@ import {
 import { toast } from "sonner";
 
 export const ToolsPanel = () => {
-  const { uploadedImages, setUploadedImages, setDraggedImage } = useImageContext();
-  const { applyShapeCrop, startFreeCut, applyPolaroidFrame } = useEditorContext();
+  const { uploadedImages, setUploadedImages, setDraggedImage, setDraggedPin } = useImageContext();
+  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +50,22 @@ export const ToolsPanel = () => {
     event.dataTransfer.setData("text/plain", "image-drag");
   };
 
+  const pinOptions: { key: PinColor; hex: string; label: string }[] = [
+    { key: 'red', hex: '#ef4444', label: 'Red' },
+    { key: 'blue', hex: '#3b82f6', label: 'Blue' },
+    { key: 'green', hex: '#22c55e', label: 'Green' },
+    { key: 'yellow', hex: '#eab308', label: 'Yellow' },
+    { key: 'purple', hex: '#a855f7', label: 'Purple' },
+  ];
+
+  const handlePinDragStart = (event: React.DragEvent, color: PinColor) => {
+    setDraggedPin(color);
+    event.dataTransfer.setData("text/plain", "pin-drag");
+  };
+
+  const handlePinClick = (color: PinColor) => {
+    pinAction(color);
+  };
   return (
     <div className="h-full flex flex-col p-4 bg-panel-bg custom-scrollbar overflow-y-auto">
       {/* Header */}
@@ -117,6 +134,32 @@ export const ToolsPanel = () => {
           <Frame className="h-3 w-3 mr-1" />
           Polaroid Frame
         </Button>
+      </Card>
+
+      {/* Pins */}
+      <Card className="p-4 mb-6 border-panel-border">
+        <div className="flex items-center gap-2 mb-3">
+          <Pin className="h-4 w-4 text-primary" />
+          <h3 className="font-medium text-foreground">Pins</h3>
+        </div>
+
+        <div className="grid grid-cols-5 gap-2">
+          {pinOptions.map((opt) => (
+            <div
+              key={opt.key}
+              role="button"
+              aria-label={`Pin ${opt.label}`}
+              title={`Drag to add, click to recolor (${opt.label})`}
+              draggable
+              onDragStart={(e) => handlePinDragStart(e, opt.key)}
+              onClick={() => handlePinClick(opt.key)}
+              className="h-10 rounded-md border border-panel-border flex items-center justify-center cursor-grab active:cursor-grabbing hover-scale"
+              style={{ backgroundColor: opt.hex }}
+            >
+              <Pin className="h-4 w-4 text-white" />
+            </div>
+          ))}
+        </div>
       </Card>
 
       {/* Uploaded Images Gallery */}
