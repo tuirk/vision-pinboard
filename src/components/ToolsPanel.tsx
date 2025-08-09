@@ -19,7 +19,7 @@ import { toast } from "sonner";
 
 export const ToolsPanel = () => {
   const { uploadedImages, setUploadedImages, setDraggedImage } = useImageContext();
-  const { applyShapeCrop, startFreeCut } = useEditorContext();
+  const { applyShapeCrop, startFreeCut, applyPolaroidFrame } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +112,7 @@ export const ToolsPanel = () => {
         
         <Separator className="my-3" />
         
-        <Button variant="outline" size="sm" className="w-full text-xs">
+        <Button variant="outline" size="sm" className="w-full text-xs" onClick={applyPolaroidFrame}>
           <Frame className="h-3 w-3 mr-1" />
           Polaroid Frame
         </Button>

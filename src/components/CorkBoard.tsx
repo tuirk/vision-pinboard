@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType } from "@/contexts/EditorContext";
 import { toast } from "sonner";
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage } = useImageContext();
-  const { setApplyShapeCrop, setStartFreeCut } = useEditorContext();
+  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
@@ -224,9 +224,75 @@ export const CorkBoard = () => {
       window.addEventListener('keydown', onKeyDown);
     };
 
+    const applyPolaroidFrame = () => {
+      const obj = fabricCanvas.getActiveObject();
+      if (!obj || obj.type !== 'image') {
+        toast.error('Select an image on the board to add a polaroid frame.');
+        return;
+      }
+      const img = obj as FabricImage;
+
+      const scaledW = (img.width ?? 0) * (img.scaleX ?? 1);
+      const scaledH = (img.height ?? 0) * (img.scaleY ?? 1);
+      const side = 16;
+      const marginTop = 16;
+      const marginBottom = 48;
+
+      const rectWidth = scaledW + side * 2;
+      const rectHeight = scaledH + marginTop + marginBottom;
+
+      const imageOffsetY = (marginTop - marginBottom) / 2;
+
+      const angle = img.angle ?? 0;
+      const centerX = (img.left ?? 0) + scaledW / 2;
+      const centerY = (img.top ?? 0) + scaledH / 2;
+      const existingShadow = img.shadow;
+
+      const frame = new Rect({
+        width: rectWidth,
+        height: rectHeight,
+        rx: 8,
+        ry: 8,
+        fill: '#ffffff',
+        stroke: 'rgba(0,0,0,0.12)',
+        strokeWidth: 1,
+        originX: 'center',
+        originY: 'center',
+      });
+
+      fabricCanvas.remove(img);
+
+      img.set({
+        left: 0,
+        top: imageOffsetY,
+        originX: 'center',
+        originY: 'center',
+      });
+
+      const group = new Group([frame, img], {
+        left: centerX,
+        top: centerY,
+        originX: 'center',
+        originY: 'center',
+        angle,
+        shadow: existingShadow ?? new Shadow({
+          color: 'rgba(0,0,0,0.25)',
+          blur: 12,
+          offsetX: 4,
+          offsetY: 6,
+        }),
+      });
+
+      fabricCanvas.add(group);
+      fabricCanvas.setActiveObject(group as any);
+      fabricCanvas.requestRenderAll();
+      toast.success('Polaroid frame added');
+    };
+
     setApplyShapeCrop(applyFn);
     setStartFreeCut(startFreeCut);
-  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut]);
+    setApplyPolaroidFrame(applyPolaroidFrame);
+  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame]);
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {
