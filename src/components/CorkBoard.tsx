@@ -154,6 +154,8 @@ export const CorkBoard = () => {
   const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const [selectedObjects, setSelectedObjects] = useState<any[]>([]);
+  const [selectionBounds, setSelectionBounds] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -173,26 +175,48 @@ export const CorkBoard = () => {
     // Do not change z-order on selection; arrows/buttons control layering
     canvas.preserveObjectStacking = true;
 
-    // Enable object controls
+    // Enable object controls and multi-selection tracking
     canvas.on('selection:created', (e) => {
       const selection = e.selected;
+      setSelectedObjects(selection || []);
+      
       if (selection && selection.length === 1) {
         // Only attach controls for single object selection
         attachControls(selection[0]);
+        setSelectionBounds(null);
+      } else if (selection && selection.length > 1) {
+        // Track selection bounds for multi-selection delete button
+        const activeSelection = canvas.getActiveObject();
+        if (activeSelection) {
+          const bounds = activeSelection.getBoundingRect();
+          setSelectionBounds(bounds);
+        }
       }
       canvas.renderAll();
     });
 
     canvas.on('selection:updated', (e) => {
       const selection = e.selected;
+      setSelectedObjects(selection || []);
+      
       if (selection && selection.length === 1) {
         // Only attach controls for single object selection
         attachControls(selection[0]);
+        setSelectionBounds(null);
+      } else if (selection && selection.length > 1) {
+        // Track selection bounds for multi-selection delete button
+        const activeSelection = canvas.getActiveObject();
+        if (activeSelection) {
+          const bounds = activeSelection.getBoundingRect();
+          setSelectionBounds(bounds);
+        }
       }
       canvas.renderAll();
     });
 
     canvas.on('selection:cleared', () => {
+      setSelectedObjects([]);
+      setSelectionBounds(null);
       canvas.renderAll();
     });
 
@@ -600,6 +624,21 @@ export const CorkBoard = () => {
     event.preventDefault();
   };
 
+  // Handle bulk delete for multi-selection
+  const handleBulkDelete = () => {
+    if (!fabricCanvas || selectedObjects.length === 0) return;
+    
+    selectedObjects.forEach(obj => {
+      fabricCanvas.remove(obj);
+    });
+    
+    fabricCanvas.discardActiveObject();
+    fabricCanvas.requestRenderAll();
+    setSelectedObjects([]);
+    setSelectionBounds(null);
+    toast.success(`Deleted ${selectedObjects.length} object${selectedObjects.length === 1 ? '' : 's'}`);
+  };
+
   return (
     <div 
       className="w-full h-full cork-texture relative"
@@ -627,6 +666,21 @@ export const CorkBoard = () => {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Multi-selection delete button */}
+      {selectionBounds && selectedObjects.length > 1 && (
+        <button
+          onClick={handleBulkDelete}
+          className="absolute z-30 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-colors"
+          style={{
+            left: selectionBounds.left + selectionBounds.width - 16,
+            top: selectionBounds.top - 16,
+          }}
+          title={`Delete ${selectedObjects.length} selected objects`}
+        >
+          ×
+        </button>
       )}
     </div>
   );
