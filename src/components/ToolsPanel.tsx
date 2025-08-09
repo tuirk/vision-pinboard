@@ -31,7 +31,7 @@ import { toast } from "sonner";
 
 export const ToolsPanel = () => {
   const { uploadedImages, setUploadedImages, setDraggedImage, setDraggedPin } = useImageContext();
-  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer, addText, exportSelected } = useEditorContext();
+  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer, addText, exportSelected, exportWallpaper } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [textContent, setTextContent] = useState("");
 
@@ -91,6 +91,10 @@ export const ToolsPanel = () => {
 
   const handleExportSelected = () => {
     exportSelected();
+  };
+
+  const handleExportWallpaper = () => {
+    exportWallpaper();
   };
   return (
     <div className="h-full flex flex-col p-4 bg-panel-bg custom-scrollbar overflow-y-auto">
@@ -200,18 +204,30 @@ export const ToolsPanel = () => {
           <h3 className="font-medium text-foreground">Export</h3>
         </div>
         
-        <Button 
-          onClick={handleExportSelected}
-          variant="outline"
-          className="w-full"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export Selected as PNG
-        </Button>
+        <div className="space-y-2">
+          <Button 
+            onClick={handleExportSelected}
+            variant="outline"
+            className="w-full"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Selected as PNG
+          </Button>
+          
+          <Button 
+            onClick={handleExportWallpaper}
+            variant="default"
+            className="w-full"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Full Wallpaper
+          </Button>
+        </div>
         
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Select objects and export as transparent PNG
-        </p>
+        <div className="text-xs text-muted-foreground mt-2 text-center space-y-1">
+          <p>Selected: Export transparent PNG of selected objects</p>
+          <p>Wallpaper: Export complete vision board with background</p>
+        </div>
       </Card>
 
       {/* Layering */}

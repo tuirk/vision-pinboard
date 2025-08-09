@@ -11,6 +11,7 @@ type PinActionFn = (color: PinColor) => void;
 type ReorderLayerFn = (op: ReorderOp) => void;
 type AddTextFn = (text: string) => void;
 type ExportSelectedFn = () => void;
+type ExportWallpaperFn = () => void;
 
 interface EditorContextType {
   applyShapeCrop: ApplyShapeFn;
@@ -27,6 +28,8 @@ interface EditorContextType {
   setAddText: (fn: AddTextFn) => void;
   exportSelected: ExportSelectedFn;
   setExportSelected: (fn: ExportSelectedFn) => void;
+  exportWallpaper: ExportWallpaperFn;
+  setExportWallpaper: (fn: ExportWallpaperFn) => void;
 }
 
 const noop: ApplyShapeFn = () => {};
@@ -36,6 +39,7 @@ const noopPinAction: PinActionFn = () => {};
 const noopReorder: ReorderLayerFn = () => {};
 const noopAddText: AddTextFn = () => {};
 const noopExportSelected: ExportSelectedFn = () => {};
+const noopExportWallpaper: ExportWallpaperFn = () => {};
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
@@ -53,6 +57,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const [reorderLayerFn, setReorderLayerFn] = useState<ReorderLayerFn>(() => noopReorder);
   const [addTextFn, setAddTextFn] = useState<AddTextFn>(() => noopAddText);
   const [exportSelectedFn, setExportSelectedFn] = useState<ExportSelectedFn>(() => noopExportSelected);
+  const [exportWallpaperFn, setExportWallpaperFn] = useState<ExportWallpaperFn>(() => noopExportWallpaper);
 
   const applyShapeCrop = useCallback((shape: ShapeType) => applyShapeCropFn(shape), [applyShapeCropFn]);
   const setApplyShapeCrop = useCallback((fn: ApplyShapeFn) => setApplyShapeCropFn(() => fn), []);
@@ -68,6 +73,8 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const setAddText = useCallback((fn: AddTextFn) => setAddTextFn(() => fn), []);
   const exportSelected = useCallback(() => exportSelectedFn(), [exportSelectedFn]);
   const setExportSelected = useCallback((fn: ExportSelectedFn) => setExportSelectedFn(() => fn), []);
+  const exportWallpaper = useCallback(() => exportWallpaperFn(), [exportWallpaperFn]);
+  const setExportWallpaper = useCallback((fn: ExportWallpaperFn) => setExportWallpaperFn(() => fn), []);
 
   const value = useMemo(
     () => ({
@@ -85,8 +92,10 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       setAddText,
       exportSelected,
       setExportSelected,
+      exportWallpaper,
+      setExportWallpaper,
     }),
-    [applyShapeCrop, setApplyShapeCrop, startFreeCut, setStartFreeCut, applyPolaroidFrame, setApplyPolaroidFrame, pinAction, setPinAction, reorderLayer, setReorderLayer, addText, setAddText, exportSelected, setExportSelected]
+    [applyShapeCrop, setApplyShapeCrop, startFreeCut, setStartFreeCut, applyPolaroidFrame, setApplyPolaroidFrame, pinAction, setPinAction, reorderLayer, setReorderLayer, addText, setAddText, exportSelected, setExportSelected, exportWallpaper, setExportWallpaper]
   );
 
   return (

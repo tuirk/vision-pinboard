@@ -151,7 +151,7 @@ const PIN_COLORS: Record<PinColor, string> = {
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage, draggedPin, setDraggedPin } = useImageContext();
-  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected } = useEditorContext();
+  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected, setExportWallpaper } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<any[]>([]);
@@ -684,12 +684,98 @@ export const CorkBoard = () => {
       }
     };
 
+    const exportWallpaper = () => {
+      try {
+        // Get canvas element for cork background
+        const corkBoardDiv = canvasRef.current?.parentElement;
+        if (!corkBoardDiv) {
+          toast.error('Canvas not found');
+          return;
+        }
+
+        // Create a new canvas that includes the cork background
+        const tempCanvas = document.createElement('canvas');
+        const ctx = tempCanvas.getContext('2d');
+        if (!ctx) {
+          toast.error('Failed to create export canvas');
+          return;
+        }
+
+        const canvasWidth = fabricCanvas.getWidth();
+        const canvasHeight = fabricCanvas.getHeight();
+        
+        tempCanvas.width = canvasWidth;
+        tempCanvas.height = canvasHeight;
+
+        // Load and draw the cork background first
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          // Draw cork background
+          ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+          
+          // Get the fabric canvas as dataURL and overlay it
+          const fabricDataURL = fabricCanvas.toDataURL({
+            format: 'png',
+            quality: 1.0,
+            multiplier: 1
+          });
+          
+          const fabricImg = new Image();
+          fabricImg.onload = () => {
+            // Draw fabric canvas on top
+            ctx.drawImage(fabricImg, 0, 0);
+            
+            // Export final image
+            const dataURL = tempCanvas.toDataURL('image/png', 1.0);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `vision-board-wallpaper-${Date.now()}.png`;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            toast.success('Wallpaper exported! Check your downloads.');
+          };
+          fabricImg.src = fabricDataURL;
+        };
+        
+        img.onerror = () => {
+          // Fallback: export just the fabric canvas without background
+          const dataURL = fabricCanvas.toDataURL({
+            format: 'png',
+            quality: 1.0,
+            multiplier: 1
+          });
+          
+          const link = document.createElement('a');
+          link.download = `vision-board-wallpaper-${Date.now()}.png`;
+          link.href = dataURL;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          toast.success('Wallpaper exported (no background)! Check your downloads.');
+        };
+        
+        // Use the background image from the div style
+        img.src = '/lovable-uploads/4c184447-f9b9-473e-ad94-93eb0138dafd.png';
+        
+      } catch (error) {
+        console.error('Export wallpaper error:', error);
+        toast.error('Failed to export wallpaper');
+      }
+    };
+
     setApplyShapeCrop(applyFn);
     setStartFreeCut(startFreeCut);
     setApplyPolaroidFrame(applyPolaroidFrame);
     setPinAction(pinAction);
     setAddText(addText);
     setExportSelected(exportSelected);
+    setExportWallpaper(exportWallpaper);
 
     const reorderLayer = (op: ReorderOp) => {
       const obj = fabricCanvas.getActiveObject();
@@ -703,7 +789,7 @@ export const CorkBoard = () => {
     };
 
     setReorderLayer(reorderLayer);
-  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected]);
+  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected, setExportWallpaper]);
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {
