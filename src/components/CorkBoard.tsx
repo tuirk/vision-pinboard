@@ -162,7 +162,7 @@ export const CorkBoard = () => {
 
     // Initialize Fabric.js canvas
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: window.innerWidth - 320, // Adjust for panel width
+      width: window.innerWidth, // Start with full width, will be adjusted
       height: window.innerHeight,
       backgroundColor: "transparent",
       selection: true,
@@ -222,17 +222,34 @@ export const CorkBoard = () => {
 
     setFabricCanvas(canvas);
 
-    // Handle window resize
+    // Handle window resize and panel changes
     const handleResize = () => {
-      const newWidth = window.innerWidth - 320;
-      const newHeight = window.innerHeight;
-      canvas.setDimensions({ width: newWidth, height: newHeight });
+      if (!canvas) return;
+      
+      // Calculate canvas width based on available space
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        canvas.setDimensions({ 
+          width: rect.width, 
+          height: window.innerHeight 
+        });
+      }
     };
 
     window.addEventListener('resize', handleResize);
+    
+    // Use ResizeObserver to detect changes when parent container resizes
+    const resizeObserver = new ResizeObserver(handleResize);
+    if (canvasRef.current) {
+      resizeObserver.observe(canvasRef.current.parentElement!);
+    }
+
+    // Initial resize
+    setTimeout(handleResize, 100);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       canvas.dispose();
     };
   }, []);

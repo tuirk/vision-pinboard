@@ -20,13 +20,13 @@ export const VisionBoard = () => {
           {/* Collapsible Tools Panel */}
           <div
             className={`
-              relative transition-all duration-300 ease-smooth
+              relative transition-all duration-300 ease-smooth overflow-hidden
               ${isPanelOpen ? "w-80" : "w-0"}
               bg-panel-bg border-r border-panel-border shadow-panel
             `}
           >
-            <div className={`${isPanelOpen ? "panel-slide-in" : "panel-slide-out"} h-full`}>
-              {isPanelOpen && <ToolsPanel />}
+            <div className={`w-80 h-full ${isPanelOpen ? "panel-slide-in" : "panel-slide-out"}`}>
+              <ToolsPanel />
             </div>
           </div>
 
