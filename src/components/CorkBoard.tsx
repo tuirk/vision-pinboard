@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control, Ellipse, Triangle } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control, Ellipse, Triangle, FabricText } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType, PinColor, ReorderOp } from "@/contexts/EditorContext";
 import { toast } from "sonner";
@@ -151,7 +151,7 @@ const PIN_COLORS: Record<PinColor, string> = {
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage, draggedPin, setDraggedPin } = useImageContext();
-  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer } = useEditorContext();
+  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<any[]>([]);
@@ -521,10 +521,38 @@ export const CorkBoard = () => {
       toast.success('Pin added');
     };
 
+    const addText = (text: string) => {
+      const centerX = fabricCanvas.getWidth() / 2;
+      const centerY = fabricCanvas.getHeight() / 2;
+
+      const textObject = new FabricText(text, {
+        left: centerX,
+        top: centerY,
+        originX: 'center',
+        originY: 'center',
+        fontFamily: 'Arial',
+        fontSize: 24,
+        fill: 'hsl(25, 20%, 15%)', // foreground color from design system
+        fontWeight: 'normal',
+        shadow: new Shadow({
+          color: 'rgba(0,0,0,0.1)',
+          blur: 4,
+          offsetX: 1,
+          offsetY: 2,
+        }),
+      });
+
+      fabricCanvas.add(textObject);
+      attachControls(textObject);
+      fabricCanvas.setActiveObject(textObject);
+      fabricCanvas.requestRenderAll();
+    };
+
     setApplyShapeCrop(applyFn);
     setStartFreeCut(startFreeCut);
     setApplyPolaroidFrame(applyPolaroidFrame);
     setPinAction(pinAction);
+    setAddText(addText);
 
     const reorderLayer = (op: ReorderOp) => {
       const obj = fabricCanvas.getActiveObject();
@@ -538,7 +566,7 @@ export const CorkBoard = () => {
     };
 
     setReorderLayer(reorderLayer);
-  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer]);
+  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText]);
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {
@@ -662,7 +690,7 @@ export const CorkBoard = () => {
               Start Creating Your Vision Board
             </h3>
             <p className="text-cork-medium">
-              Drag images from the left panel onto this cork board
+              Drag images from the left panel or add text to this cork board
             </p>
           </div>
         </div>

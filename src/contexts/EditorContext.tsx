@@ -9,6 +9,7 @@ type StartFreeCutFn = () => void;
 type ApplyPolaroidFn = () => void;
 type PinActionFn = (color: PinColor) => void;
 type ReorderLayerFn = (op: ReorderOp) => void;
+type AddTextFn = (text: string) => void;
 
 interface EditorContextType {
   applyShapeCrop: ApplyShapeFn;
@@ -21,6 +22,8 @@ interface EditorContextType {
   setPinAction: (fn: PinActionFn) => void;
   reorderLayer: ReorderLayerFn;
   setReorderLayer: (fn: ReorderLayerFn) => void;
+  addText: AddTextFn;
+  setAddText: (fn: AddTextFn) => void;
 }
 
 const noop: ApplyShapeFn = () => {};
@@ -28,6 +31,7 @@ const noopVoid: StartFreeCutFn = () => {};
 const noopPolaroid: ApplyPolaroidFn = () => {};
 const noopPinAction: PinActionFn = () => {};
 const noopReorder: ReorderLayerFn = () => {};
+const noopAddText: AddTextFn = () => {};
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
@@ -43,6 +47,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const [applyPolaroidFrameFn, setApplyPolaroidFrameFn] = useState<ApplyPolaroidFn>(() => noopPolaroid);
   const [pinActionFn, setPinActionFn] = useState<PinActionFn>(() => noopPinAction);
   const [reorderLayerFn, setReorderLayerFn] = useState<ReorderLayerFn>(() => noopReorder);
+  const [addTextFn, setAddTextFn] = useState<AddTextFn>(() => noopAddText);
 
   const applyShapeCrop = useCallback((shape: ShapeType) => applyShapeCropFn(shape), [applyShapeCropFn]);
   const setApplyShapeCrop = useCallback((fn: ApplyShapeFn) => setApplyShapeCropFn(() => fn), []);
@@ -54,6 +59,8 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const setPinAction = useCallback((fn: PinActionFn) => setPinActionFn(() => fn), []);
   const reorderLayer = useCallback((op: ReorderOp) => reorderLayerFn(op), [reorderLayerFn]);
   const setReorderLayer = useCallback((fn: ReorderLayerFn) => setReorderLayerFn(() => fn), []);
+  const addText = useCallback((text: string) => addTextFn(text), [addTextFn]);
+  const setAddText = useCallback((fn: AddTextFn) => setAddTextFn(() => fn), []);
 
   const value = useMemo(
     () => ({
@@ -67,8 +74,10 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       setPinAction,
       reorderLayer,
       setReorderLayer,
+      addText,
+      setAddText,
     }),
-    [applyShapeCrop, setApplyShapeCrop, startFreeCut, setStartFreeCut, applyPolaroidFrame, setApplyPolaroidFrame, pinAction, setPinAction, reorderLayer, setReorderLayer]
+    [applyShapeCrop, setApplyShapeCrop, startFreeCut, setStartFreeCut, applyPolaroidFrame, setApplyPolaroidFrame, pinAction, setPinAction, reorderLayer, setReorderLayer, addText, setAddText]
   );
 
   return (

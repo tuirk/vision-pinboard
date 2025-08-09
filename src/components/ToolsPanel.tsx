@@ -1,11 +1,13 @@
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext } from "@/contexts/EditorContext";
 import type { PinColor } from "@/contexts/EditorContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { 
   Upload, 
   Image as ImageIcon, 
@@ -20,14 +22,17 @@ import {
   ArrowDown,
   ChevronsUp,
   ChevronsDown,
-  Layers
+  Layers,
+  Type,
+  Plus
 } from "lucide-react";
 import { toast } from "sonner";
 
 export const ToolsPanel = () => {
   const { uploadedImages, setUploadedImages, setDraggedImage, setDraggedPin } = useImageContext();
-  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer } = useEditorContext();
+  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer, addText } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [textContent, setTextContent] = useState("");
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -71,6 +76,17 @@ export const ToolsPanel = () => {
   const handlePinClick = (color: PinColor) => {
     pinAction(color);
   };
+
+  const handleAddText = () => {
+    if (!textContent.trim()) {
+      toast.error("Please enter some text before adding it to the board.");
+      return;
+    }
+    
+    addText(textContent);
+    setTextContent("");
+    toast.success("Text added to board!");
+  };
   return (
     <div className="h-full flex flex-col p-4 bg-panel-bg custom-scrollbar overflow-y-auto">
       {/* Header */}
@@ -105,6 +121,37 @@ export const ToolsPanel = () => {
           onChange={handleFileUpload}
           className="hidden"
         />
+      </Card>
+
+      {/* Text Editor Section */}
+      <Card className="p-4 mb-6 border-panel-border">
+        <div className="flex items-center gap-2 mb-3">
+          <Type className="h-4 w-4 text-primary" />
+          <h3 className="font-medium text-foreground">Add Text</h3>
+        </div>
+        
+        <div className="space-y-3">
+          <div>
+            <Label htmlFor="text-content" className="text-sm">Text Content</Label>
+            <Textarea
+              id="text-content"
+              placeholder="Enter your text here..."
+              value={textContent}
+              onChange={(e) => setTextContent(e.target.value)}
+              className="mt-1 min-h-[80px] resize-none"
+            />
+          </div>
+          
+          <Button 
+            onClick={handleAddText}
+            variant="default"
+            className="w-full"
+            disabled={!textContent.trim()}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Text to Board
+          </Button>
+        </div>
       </Card>
 
       {/* Image Editing Tools */}
