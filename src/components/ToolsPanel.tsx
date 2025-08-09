@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 import { useRef, useState } from "react";
+=======
+import { useRef } from "react";
+>>>>>>> 92b5ec5 (Fix FrameIcon reference)
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext } from "@/contexts/EditorContext";
 <<<<<<< HEAD
@@ -199,7 +203,11 @@ export const ToolsPanel = () => {
         
         <Separator className="my-3" />
         
+<<<<<<< HEAD
         <Button variant="outline" size="sm" className="w-full text-xs" onClick={applyPolaroidFrame}>
+=======
+        <Button variant="outline" size="sm" className="w-full text-xs">
+>>>>>>> 92b5ec5 (Fix FrameIcon reference)
           <Frame className="h-3 w-3 mr-1" />
           Polaroid Frame
         </Button>
