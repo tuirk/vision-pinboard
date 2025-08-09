@@ -54,15 +54,12 @@ const createLayerControl = (dir: 'up' | 'down') =>
       const target = transform.target as any;
       const canvas = target?.canvas as FabricCanvas | undefined;
       if (canvas && target) {
-        const objects = canvas.getObjects();
-        const idx = objects.indexOf(target);
-        if (idx !== -1) {
-          const newIndex = dir === 'up' ? Math.min(idx + 1, objects.length - 1) : Math.max(idx - 1, 0);
-          canvas.remove(target);
-          // @ts-ignore fabric v6: insertAt exists
-          (canvas as any).insertAt(target, newIndex, true);
-          canvas.setActiveObject(target);
+        if (dir === 'up') {
+          canvas.bringObjectForward(target);
+        } else {
+          canvas.sendObjectBackwards(target);
         }
+        canvas.setActiveObject(target);
         canvas.requestRenderAll();
       }
       return true;
@@ -456,25 +453,21 @@ export const CorkBoard = () => {
         toast.error('Select an item to change layer.');
         return;
       }
-      const objects = fabricCanvas.getObjects();
-      const idx = objects.indexOf(obj);
-      if (idx === -1) return;
-      let newIndex = idx;
+      
       switch (op) {
         case 'forward':
-          newIndex = Math.min(idx + 1, objects.length - 1);
+          fabricCanvas.bringObjectForward(obj);
           break;
         case 'backward':
-          newIndex = Math.max(idx - 1, 0);
+          fabricCanvas.sendObjectBackwards(obj);
           break;
         case 'front':
-          newIndex = objects.length - 1;
+          fabricCanvas.bringObjectToFront(obj);
           break;
         case 'back':
-          newIndex = 0;
+          fabricCanvas.sendObjectToBack(obj);
           break;
       }
-      (obj as any).moveTo(newIndex);
       fabricCanvas.requestRenderAll();
     };
 
