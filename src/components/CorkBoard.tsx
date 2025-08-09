@@ -164,21 +164,31 @@ export const CorkBoard = () => {
       height: window.innerHeight,
       backgroundColor: "transparent",
       selection: true,
+      selectionBorderColor: 'rgba(255, 105, 180, 0.8)',
+      selectionLineWidth: 2,
+      selectionColor: 'rgba(255, 105, 180, 0.1)',
+      selectionDashArray: [5, 5],
     });
 
     // Do not change z-order on selection; arrows/buttons control layering
     canvas.preserveObjectStacking = true;
 
     // Enable object controls
-    canvas.on('selection:created', () => {
-      const obj = canvas.getActiveObject() as any;
-      if (obj) attachControls(obj);
+    canvas.on('selection:created', (e) => {
+      const selection = e.selected;
+      if (selection && selection.length === 1) {
+        // Only attach controls for single object selection
+        attachControls(selection[0]);
+      }
       canvas.renderAll();
     });
 
-    canvas.on('selection:updated', () => {
-      const obj = canvas.getActiveObject() as any;
-      if (obj) attachControls(obj);
+    canvas.on('selection:updated', (e) => {
+      const selection = e.selected;
+      if (selection && selection.length === 1) {
+        // Only attach controls for single object selection
+        attachControls(selection[0]);
+      }
       canvas.renderAll();
     });
 
