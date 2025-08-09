@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+<<<<<<< HEAD
 import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control, Ellipse, Triangle, FabricText } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType, PinColor, ReorderOp } from "@/contexts/EditorContext";
+=======
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path } from "fabric";
+import { useImageContext } from "@/contexts/ImageContext";
+import { useEditorContext, ShapeType } from "@/contexts/EditorContext";
+>>>>>>> d453ff0 (Add image cropping shapes)
 import { toast } from "sonner";
 
 // Helper: delete control for objects
@@ -150,8 +156,13 @@ const PIN_COLORS: Record<PinColor, string> = {
 };
 
 export const CorkBoard = () => {
+<<<<<<< HEAD
   const { draggedImage, setDraggedImage, draggedPin, setDraggedPin } = useImageContext();
   const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected } = useEditorContext();
+=======
+  const { draggedImage, setDraggedImage } = useImageContext();
+  const { setApplyShapeCrop } = useEditorContext();
+>>>>>>> d453ff0 (Add image cropping shapes)
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<any[]>([]);
@@ -317,6 +328,7 @@ export const CorkBoard = () => {
       }
     };
 
+<<<<<<< HEAD
     const startFreeCut = () => {
       const obj = fabricCanvas.getActiveObject();
       if (!obj || obj.type !== 'image') {
@@ -704,6 +716,10 @@ export const CorkBoard = () => {
 
     setReorderLayer(reorderLayer);
   }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected]);
+=======
+    setApplyShapeCrop(applyFn);
+  }, [fabricCanvas, setApplyShapeCrop]);
+>>>>>>> d453ff0 (Add image cropping shapes)
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {

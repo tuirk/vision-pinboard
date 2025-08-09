@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from "react";
 
 export type ShapeType = "circle" | "square" | "heart";
@@ -11,10 +12,18 @@ type PinActionFn = (color: PinColor) => void;
 type ReorderLayerFn = (op: ReorderOp) => void;
 type AddTextFn = (text: string) => void;
 type ExportSelectedFn = () => void;
+=======
+import { createContext, useContext, useState, ReactNode } from "react";
+
+export type ShapeType = "circle" | "square" | "heart";
+
+type ApplyShapeFn = (shape: ShapeType) => void;
+>>>>>>> d453ff0 (Add image cropping shapes)
 
 interface EditorContextType {
   applyShapeCrop: ApplyShapeFn;
   setApplyShapeCrop: (fn: ApplyShapeFn) => void;
+<<<<<<< HEAD
   startFreeCut: StartFreeCutFn;
   setStartFreeCut: (fn: StartFreeCutFn) => void;
   applyPolaroidFrame: ApplyPolaroidFn;
@@ -36,6 +45,11 @@ const noopPinAction: PinActionFn = () => {};
 const noopReorder: ReorderLayerFn = () => {};
 const noopAddText: AddTextFn = () => {};
 const noopExportSelected: ExportSelectedFn = () => {};
+=======
+}
+
+const noop: ApplyShapeFn = () => {};
+>>>>>>> d453ff0 (Add image cropping shapes)
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
@@ -47,6 +61,7 @@ export const useEditorContext = () => {
 
 export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const [applyShapeCropFn, setApplyShapeCropFn] = useState<ApplyShapeFn>(() => noop);
+<<<<<<< HEAD
   const [startFreeCutFn, setStartFreeCutFn] = useState<StartFreeCutFn>(() => noopVoid);
   const [applyPolaroidFrameFn, setApplyPolaroidFrameFn] = useState<ApplyPolaroidFn>(() => noopPolaroid);
   const [pinActionFn, setPinActionFn] = useState<PinActionFn>(() => noopPinAction);
@@ -91,6 +106,16 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <EditorContext.Provider value={value}>
+=======
+
+  return (
+    <EditorContext.Provider
+      value={{
+        applyShapeCrop: (shape) => applyShapeCropFn(shape),
+        setApplyShapeCrop: (fn) => setApplyShapeCropFn(() => fn),
+      }}
+    >
+>>>>>>> d453ff0 (Add image cropping shapes)
       {children}
     </EditorContext.Provider>
   );
