@@ -151,7 +151,7 @@ const PIN_COLORS: Record<PinColor, string> = {
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage, draggedPin, setDraggedPin } = useImageContext();
-  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText } = useEditorContext();
+  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<any[]>([]);
@@ -548,11 +548,87 @@ export const CorkBoard = () => {
       fabricCanvas.requestRenderAll();
     };
 
+    const exportSelected = () => {
+      const activeObjects = fabricCanvas.getActiveObjects();
+      
+      if (activeObjects.length === 0) {
+        toast.error('Please select objects to export');
+        return;
+      }
+
+      // Create a temporary canvas for export
+      const tempCanvas = new FabricCanvas(null, {
+        backgroundColor: 'transparent',
+      });
+
+      // Calculate bounds of selected objects
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      activeObjects.forEach(obj => {
+        const bounds = obj.getBoundingRect();
+        minX = Math.min(minX, bounds.left);
+        minY = Math.min(minY, bounds.top);
+        maxX = Math.max(maxX, bounds.left + bounds.width);
+        maxY = Math.max(maxY, bounds.top + bounds.height);
+      });
+
+      const padding = 20;
+      const exportWidth = maxX - minX + padding * 2;
+      const exportHeight = maxY - minY + padding * 2;
+
+      tempCanvas.setDimensions({
+        width: exportWidth,
+        height: exportHeight
+      });
+
+      // Clone and add objects to temp canvas
+      activeObjects.forEach(obj => {
+        obj.clone().then((clonedObj: any) => {
+          // Adjust position relative to bounds
+          clonedObj.set({
+            left: clonedObj.left - minX + padding,
+            top: clonedObj.top - minY + padding
+          });
+          
+          tempCanvas.add(clonedObj);
+          
+          // Check if all objects are added
+          if (tempCanvas.getObjects().length === activeObjects.length) {
+            // Export as PNG with transparent background
+            const dataURL = tempCanvas.toDataURL({
+              format: 'png',
+              quality: 1.0,
+              multiplier: 1
+            });
+
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `vision-board-export-${Date.now()}.png`;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Cleanup
+            tempCanvas.dispose();
+            toast.success('Export complete! Check your downloads.');
+          }
+        }).catch((err: any) => {
+          console.error('Error cloning object:', err);
+          toast.error('Error exporting objects');
+        });
+      });
+    };
+
     setApplyShapeCrop(applyFn);
     setStartFreeCut(startFreeCut);
     setApplyPolaroidFrame(applyPolaroidFrame);
     setPinAction(pinAction);
     setAddText(addText);
+    setExportSelected(exportSelected);
 
     const reorderLayer = (op: ReorderOp) => {
       const obj = fabricCanvas.getActiveObject();
@@ -566,7 +642,7 @@ export const CorkBoard = () => {
     };
 
     setReorderLayer(reorderLayer);
-  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText]);
+  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected]);
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {

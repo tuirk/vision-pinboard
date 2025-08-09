@@ -24,13 +24,14 @@ import {
   ChevronsDown,
   Layers,
   Type,
-  Plus
+  Plus,
+  Download
 } from "lucide-react";
 import { toast } from "sonner";
 
 export const ToolsPanel = () => {
   const { uploadedImages, setUploadedImages, setDraggedImage, setDraggedPin } = useImageContext();
-  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer, addText } = useEditorContext();
+  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer, addText, exportSelected } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [textContent, setTextContent] = useState("");
 
@@ -86,6 +87,10 @@ export const ToolsPanel = () => {
     addText(textContent);
     setTextContent("");
     toast.success("Text added to board!");
+  };
+
+  const handleExportSelected = () => {
+    exportSelected();
   };
   return (
     <div className="h-full flex flex-col p-4 bg-panel-bg custom-scrollbar overflow-y-auto">
@@ -186,6 +191,27 @@ export const ToolsPanel = () => {
           <Frame className="h-3 w-3 mr-1" />
           Polaroid Frame
         </Button>
+      </Card>
+
+      {/* Export Section */}
+      <Card className="p-4 mb-6 border-panel-border">
+        <div className="flex items-center gap-2 mb-3">
+          <Download className="h-4 w-4 text-primary" />
+          <h3 className="font-medium text-foreground">Export</h3>
+        </div>
+        
+        <Button 
+          onClick={handleExportSelected}
+          variant="outline"
+          className="w-full"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export Selected as PNG
+        </Button>
+        
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          Select objects and export as transparent PNG
+        </p>
       </Card>
 
       {/* Layering */}
