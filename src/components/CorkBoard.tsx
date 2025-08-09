@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType } from "@/contexts/EditorContext";
 import { toast } from "sonner";
@@ -181,14 +181,27 @@ export const CorkBoard = () => {
           fabricCanvas.remove(tempPolyline);
           tempPolyline = null;
         }
-        const polygon = new Polygon(points, {
+        // Convert canvas points to image-local coords and center them to image center
+        const inv = util.invertTransform(img.calcTransformMatrix());
+        const imgW = img.width ?? 0;
+        const imgH = img.height ?? 0;
+        const cx = imgW / 2;
+        const cy = imgH / 2;
+        const localCentered = points.map((p) => {
+          const pt = util.transformPoint(new Point(p.x, p.y), inv);
+          return { x: pt.x - cx, y: pt.y - cy };
+        });
+
+        const polygon = new Polygon(localCentered, {
           fill: 'black',
           selectable: false,
           evented: false,
+          left: 0,
+          top: 0,
+          originX: 'center',
+          originY: 'center',
         });
-        // Use absolute positioning so we don't need to transform into image space
-        // fabric supports absolute-positioned clipPath for canvas coords
-        polygon.absolutePositioned = true;
+
         img.set({ clipPath: polygon });
         fabricCanvas.requestRenderAll();
         toast.success('Free cut applied');
