@@ -3,6 +3,7 @@ import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Poly
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType, PinColor, ReorderOp } from "@/contexts/EditorContext";
 import { toast } from "sonner";
+import corkTexture from "@/assets/cork-texture-tile.jpg";
 
 // Helper: delete control for objects
 const createDeleteControl = () =>
@@ -807,6 +808,7 @@ export const CorkBoard = () => {
   return (
     <div 
       className="w-full h-full cork-texture relative"
+      style={{ backgroundImage: `url(${corkTexture})`, backgroundRepeat: 'repeat', backgroundSize: '512px 512px' }}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
     >
