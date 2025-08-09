@@ -1,8 +1,52 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType } from "@/contexts/EditorContext";
 import { toast } from "sonner";
+
+// Helper: delete control for objects
+const createDeleteControl = () =>
+  new Control({
+    x: 0.5,
+    y: -0.5,
+    offsetX: 8,
+    offsetY: -8,
+    cursorStyle: 'pointer',
+    mouseUpHandler: (_evt, transform) => {
+      const target = transform.target as any;
+      const canvas = target?.canvas as FabricCanvas | undefined;
+      if (canvas && target) {
+        canvas.remove(target);
+        canvas.requestRenderAll();
+      }
+      return true;
+    },
+    render: (ctx: CanvasRenderingContext2D, left: number, top: number) => {
+      const r = 10;
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-5, -5);
+      ctx.lineTo(5, 5);
+      ctx.moveTo(-5, 5);
+      ctx.lineTo(5, -5);
+      ctx.stroke();
+      ctx.restore();
+    },
+    sizeX: 24,
+    sizeY: 24,
+  });
+
+const attachDeleteControl = (obj: any) => {
+  if (!obj?.controls) return;
+  obj.controls.deleteControl = createDeleteControl();
+};
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage } = useImageContext();
@@ -23,10 +67,14 @@ export const CorkBoard = () => {
 
     // Enable object controls
     canvas.on('selection:created', () => {
+      const obj = canvas.getActiveObject() as any;
+      if (obj) attachDeleteControl(obj);
       canvas.renderAll();
     });
 
     canvas.on('selection:updated', () => {
+      const obj = canvas.getActiveObject() as any;
+      if (obj) attachDeleteControl(obj);
       canvas.renderAll();
     });
 
@@ -284,6 +332,7 @@ export const CorkBoard = () => {
       });
 
       fabricCanvas.add(group);
+      attachDeleteControl(group);
       fabricCanvas.setActiveObject(group as any);
       fabricCanvas.requestRenderAll();
       toast.success('Polaroid frame added');
@@ -337,6 +386,8 @@ export const CorkBoard = () => {
               offsetY: 3,
             }
           });
+
+          attachDeleteControl(img);
 
           fabricCanvas.add(img);
           fabricCanvas.setActiveObject(img);
