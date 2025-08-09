@@ -54,8 +54,12 @@ const createLayerControl = (dir: 'up' | 'down') =>
       const target = transform.target as any;
       const canvas = target?.canvas as FabricCanvas | undefined;
       if (canvas && target) {
-        if (dir === 'up') (canvas as any).bringForward(target);
-        else (canvas as any).sendBackwards(target);
+        const objects = canvas.getObjects();
+        const idx = objects.indexOf(target);
+        if (idx !== -1) {
+          const newIndex = dir === 'up' ? Math.min(idx + 1, objects.length - 1) : Math.max(idx - 1, 0);
+          target.moveTo(newIndex);
+        }
         canvas.requestRenderAll();
       }
       return true;
