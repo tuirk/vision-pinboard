@@ -178,6 +178,9 @@ export const CorkBoard = () => {
       selection: true,
     });
 
+    // Do not change z-order on selection; arrows/buttons control layering
+    canvas.preserveObjectStacking = true;
+
     // Enable object controls
     canvas.on('selection:created', () => {
       const obj = canvas.getActiveObject() as any;
