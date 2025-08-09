@@ -556,11 +556,6 @@ export const CorkBoard = () => {
         return;
       }
 
-      // Create a temporary canvas for export
-      const tempCanvas = new FabricCanvas(null, {
-        backgroundColor: 'transparent',
-      });
-
       // Calculate bounds of selected objects
       let minX = Infinity;
       let minY = Infinity;
@@ -579,48 +574,97 @@ export const CorkBoard = () => {
       const exportWidth = maxX - minX + padding * 2;
       const exportHeight = maxY - minY + padding * 2;
 
-      tempCanvas.setDimensions({
+      // Create a temporary canvas for export
+      const tempCanvas = new FabricCanvas(null, {
+        backgroundColor: 'transparent',
         width: exportWidth,
         height: exportHeight
       });
 
-      // Clone and add objects to temp canvas
-      activeObjects.forEach(obj => {
-        obj.clone().then((clonedObj: any) => {
-          // Adjust position relative to bounds
-          clonedObj.set({
-            left: clonedObj.left - minX + padding,
-            top: clonedObj.top - minY + padding
+      // Instead of cloning, we'll render the selection area directly
+      // Create a cropped version of the main canvas
+      const originalObjects = fabricCanvas.getObjects();
+      const visibleObjects: any[] = [];
+
+      // Temporarily hide objects outside selection bounds
+      originalObjects.forEach(obj => {
+        const bounds = obj.getBoundingRect();
+        const objCenterX = bounds.left + bounds.width / 2;
+        const objCenterY = bounds.top + bounds.height / 2;
+        
+        // Check if object overlaps with selection area
+        const overlaps = !(bounds.left > maxX || 
+                          bounds.left + bounds.width < minX || 
+                          bounds.top > maxY || 
+                          bounds.top + bounds.height < minY);
+        
+        if (overlaps && activeObjects.includes(obj)) {
+          visibleObjects.push(obj);
+        }
+      });
+
+      if (visibleObjects.length === 0) {
+        toast.error('No valid objects to export');
+        return;
+      }
+
+      // Create export by rendering only selected objects
+      try {
+        // Store original positions and adjust for export
+        const originalStates: any[] = [];
+        
+        visibleObjects.forEach((obj, index) => {
+          originalStates[index] = {
+            left: obj.left,
+            top: obj.top
+          };
+          
+          // Adjust position for export canvas
+          obj.set({
+            left: obj.left - minX + padding,
+            top: obj.top - minY + padding
           });
           
-          tempCanvas.add(clonedObj);
-          
-          // Check if all objects are added
-          if (tempCanvas.getObjects().length === activeObjects.length) {
-            // Export as PNG with transparent background
-            const dataURL = tempCanvas.toDataURL({
-              format: 'png',
-              quality: 1.0,
-              multiplier: 1
-            });
-
-            // Create download link
-            const link = document.createElement('a');
-            link.download = `vision-board-export-${Date.now()}.png`;
-            link.href = dataURL;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            // Cleanup
-            tempCanvas.dispose();
-            toast.success('Export complete! Check your downloads.');
-          }
-        }).catch((err: any) => {
-          console.error('Error cloning object:', err);
-          toast.error('Error exporting objects');
+          tempCanvas.add(obj);
         });
-      });
+
+        // Render and export
+        tempCanvas.renderAll();
+        
+        const dataURL = tempCanvas.toDataURL({
+          format: 'png',
+          quality: 1.0,
+          multiplier: 1
+        });
+
+        // Restore original positions
+        visibleObjects.forEach((obj, index) => {
+          obj.set(originalStates[index]);
+          tempCanvas.remove(obj);
+          fabricCanvas.add(obj);
+        });
+
+        fabricCanvas.renderAll();
+
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `vision-board-export-${Date.now()}.png`;
+        link.href = dataURL;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Cleanup
+        tempCanvas.dispose();
+        toast.success('Export complete! Check your downloads.');
+
+      } catch (error) {
+        console.error('Export error:', error);
+        toast.error('Failed to export selection');
+        
+        // Cleanup on error
+        tempCanvas.dispose();
+      }
     };
 
     setApplyShapeCrop(applyFn);
