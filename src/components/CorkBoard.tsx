@@ -43,9 +43,55 @@ const createDeleteControl = () =>
     sizeY: 24,
   });
 
-const attachDeleteControl = (obj: any) => {
+const createLayerControl = (dir: 'up' | 'down') =>
+  new Control({
+    x: dir === 'up' ? 0.3 : 0.1,
+    y: -0.5,
+    offsetX: 0,
+    offsetY: -8,
+    cursorStyle: 'pointer',
+    mouseUpHandler: (_evt, transform) => {
+      const target = transform.target as any;
+      const canvas = target?.canvas as FabricCanvas | undefined;
+      if (canvas && target) {
+        if (dir === 'up') (canvas as any).bringForward(target);
+        else (canvas as any).sendBackwards(target);
+        canvas.requestRenderAll();
+      }
+      return true;
+    },
+    render: (ctx: CanvasRenderingContext2D, left: number, top: number) => {
+      const r = 10;
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#111827';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (dir === 'up') {
+        ctx.moveTo(-4, 3);
+        ctx.lineTo(0, -3);
+        ctx.lineTo(4, 3);
+      } else {
+        ctx.moveTo(-4, -3);
+        ctx.lineTo(0, 3);
+        ctx.lineTo(4, -3);
+      }
+      ctx.stroke();
+      ctx.restore();
+    },
+    sizeX: 24,
+    sizeY: 24,
+  });
+
+const attachControls = (obj: any) => {
   if (!obj?.controls) return;
   obj.controls.deleteControl = createDeleteControl();
+  obj.controls.layerUp = createLayerControl('up');
+  obj.controls.layerDown = createLayerControl('down');
 };
 
 const PIN_COLORS: Record<PinColor, string> = {
@@ -77,13 +123,13 @@ export const CorkBoard = () => {
     // Enable object controls
     canvas.on('selection:created', () => {
       const obj = canvas.getActiveObject() as any;
-      if (obj) attachDeleteControl(obj);
+      if (obj) attachControls(obj);
       canvas.renderAll();
     });
 
     canvas.on('selection:updated', () => {
       const obj = canvas.getActiveObject() as any;
-      if (obj) attachDeleteControl(obj);
+      if (obj) attachControls(obj);
       canvas.renderAll();
     });
 
@@ -341,7 +387,7 @@ export const CorkBoard = () => {
       });
 
       fabricCanvas.add(group);
-      attachDeleteControl(group);
+      attachControls(group);
       fabricCanvas.setActiveObject(group as any);
       fabricCanvas.requestRenderAll();
       toast.success('Polaroid frame added');
@@ -386,7 +432,7 @@ export const CorkBoard = () => {
       (pinGroup as any).name = 'pin';
 
       fabricCanvas.add(pinGroup);
-      attachDeleteControl(pinGroup);
+      attachControls(pinGroup);
       fabricCanvas.setActiveObject(pinGroup as any);
       fabricCanvas.requestRenderAll();
       toast.success('Pin added');
@@ -429,7 +475,7 @@ export const CorkBoard = () => {
       (pinGroup as any).name = 'pin';
 
       fabricCanvas.add(pinGroup);
-      attachDeleteControl(pinGroup);
+      attachControls(pinGroup);
       fabricCanvas.setActiveObject(pinGroup as any);
       fabricCanvas.requestRenderAll();
       setDraggedPin(null);
@@ -456,7 +502,7 @@ export const CorkBoard = () => {
             shadow: { color: 'rgba(0,0,0,0.3)', blur: 10, offsetX: 3, offsetY: 3 },
           });
 
-          attachDeleteControl(img);
+          attachControls(img);
           fabricCanvas.add(img);
           fabricCanvas.setActiveObject(img);
           fabricCanvas.renderAll();
