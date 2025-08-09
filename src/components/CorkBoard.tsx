@@ -163,6 +163,7 @@ export const CorkBoard = () => {
         fabricCanvas.off('mouse:move', onMouseMove);
         window.removeEventListener('keydown', onKeyDown);
         fabricCanvas.selection = true;
+        fabricCanvas.skipTargetFind = false;
         if (tempPolyline) {
           fabricCanvas.remove(tempPolyline);
           tempPolyline = null;
@@ -204,6 +205,7 @@ export const CorkBoard = () => {
       };
 
       fabricCanvas.selection = false;
+      fabricCanvas.skipTargetFind = true;
       fabricCanvas.on('mouse:down', onMouseDown);
       fabricCanvas.on('mouse:move', onMouseMove);
       window.addEventListener('keydown', onKeyDown);

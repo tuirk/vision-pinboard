@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from "react";
 
 export type ShapeType = "circle" | "square" | "heart";
 
@@ -24,18 +24,26 @@ export const useEditorContext = () => {
 };
 
 export const EditorProvider = ({ children }: { children: ReactNode }) => {
-const [applyShapeCropFn, setApplyShapeCropFn] = useState<ApplyShapeFn>(() => noop);
+  const [applyShapeCropFn, setApplyShapeCropFn] = useState<ApplyShapeFn>(() => noop);
   const [startFreeCutFn, setStartFreeCutFn] = useState<StartFreeCutFn>(() => noopVoid);
 
+  const applyShapeCrop = useCallback((shape: ShapeType) => applyShapeCropFn(shape), [applyShapeCropFn]);
+  const setApplyShapeCrop = useCallback((fn: ApplyShapeFn) => setApplyShapeCropFn(() => fn), []);
+  const startFreeCut = useCallback(() => startFreeCutFn(), [startFreeCutFn]);
+  const setStartFreeCut = useCallback((fn: StartFreeCutFn) => setStartFreeCutFn(() => fn), []);
+
+  const value = useMemo(
+    () => ({
+      applyShapeCrop,
+      setApplyShapeCrop,
+      startFreeCut,
+      setStartFreeCut,
+    }),
+    [applyShapeCrop, setApplyShapeCrop, startFreeCut, setStartFreeCut]
+  );
+
   return (
-    <EditorContext.Provider
-      value={{
-        applyShapeCrop: (shape) => applyShapeCropFn(shape),
-        setApplyShapeCrop: (fn) => setApplyShapeCropFn(() => fn),
-        startFreeCut: () => startFreeCutFn(),
-        setStartFreeCut: (fn) => setStartFreeCutFn(() => fn),
-      }}
-    >
+    <EditorContext.Provider value={value}>
       {children}
     </EditorContext.Provider>
   );
