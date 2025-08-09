@@ -54,11 +54,8 @@ const createLayerControl = (dir: 'up' | 'down') =>
       const target = transform.target as any;
       const canvas = target?.canvas as FabricCanvas | undefined;
       if (canvas && target) {
-        if (dir === 'up') {
-          canvas.bringObjectForward(target);
-        } else {
-          canvas.sendObjectBackwards(target);
-        }
+        // Use precise layerable-based stepping
+        reorderWithinLayerables(canvas, target, dir === 'up' ? 'forward' : 'backward');
         canvas.setActiveObject(target);
         canvas.requestRenderAll();
       }
@@ -98,6 +95,64 @@ const attachControls = (obj: any) => {
   obj.controls.layerDown = createLayerControl('down');
 };
 
+// Layering helpers: operate only on "layerable" objects to ensure predictable one-step moves
+function isLayerable(obj: any): boolean {
+  return !!obj && obj.visible !== false && obj.selectable !== false && obj.evented !== false;
+}
+
+function getLayerables(canvas: FabricCanvas): any[] {
+  const objs = canvas.getObjects();
+  return objs.filter(isLayerable);
+}
+
+function reorderWithinLayerables(
+  canvas: FabricCanvas,
+  target: any,
+  op: 'forward' | 'backward' | 'front' | 'back'
+) {
+  const objs = canvas.getObjects();
+  if (!objs.length || !target) return;
+
+  const layerables = getLayerables(canvas);
+  const pos = layerables.indexOf(target);
+  if (pos === -1) return; // target not layerable
+
+  const indexOf = (o: any) => objs.indexOf(o);
+
+  if (op === 'forward') {
+    if (pos >= layerables.length - 1) return; // already top among layerables
+    const neighborAbove = layerables[pos + 1];
+    const newIndex = indexOf(neighborAbove) + 1; // place just above neighbor
+    target.moveTo(newIndex);
+    return;
+  }
+
+  if (op === 'backward') {
+    if (pos <= 0) return; // already bottom among layerables
+    const neighborBelow = layerables[pos - 1];
+    const newIndex = indexOf(neighborBelow); // place just below neighbor (before it in array)
+    target.moveTo(newIndex);
+    return;
+  }
+
+  if (op === 'front') {
+    if (pos >= layerables.length - 1) return; // already top among layerables
+    // topmost other layerable
+    const topOther = layerables[layerables.length - 1];
+    const newIndex = indexOf(topOther) + 1; // just above top layerable, below any non-layerables above
+    target.moveTo(newIndex);
+    return;
+  }
+
+  if (op === 'back') {
+    if (pos <= 0) return; // already bottom among layerables
+    const bottomOther = layerables[0];
+    const newIndex = indexOf(bottomOther); // move below bottom layerable
+    target.moveTo(newIndex);
+    return;
+  }
+}
+
 const PIN_COLORS: Record<PinColor, string> = {
   red: '#ef4444',
   blue: '#3b82f6',
@@ -105,7 +160,6 @@ const PIN_COLORS: Record<PinColor, string> = {
   yellow: '#eab308',
   purple: '#a855f7',
 };
-
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage, draggedPin, setDraggedPin } = useImageContext();
@@ -453,21 +507,8 @@ export const CorkBoard = () => {
         toast.error('Select an item to change layer.');
         return;
       }
-      
-      switch (op) {
-        case 'forward':
-          fabricCanvas.bringObjectForward(obj);
-          break;
-        case 'backward':
-          fabricCanvas.sendObjectBackwards(obj);
-          break;
-        case 'front':
-          fabricCanvas.bringObjectToFront(obj);
-          break;
-        case 'back':
-          fabricCanvas.sendObjectToBack(obj);
-          break;
-      }
+      reorderWithinLayerables(fabricCanvas, obj as any, op);
+      fabricCanvas.setActiveObject(obj);
       fabricCanvas.requestRenderAll();
     };
 
