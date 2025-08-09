@@ -1,3 +1,4 @@
+
 import { useRef } from "react";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext } from "@/contexts/EditorContext";
@@ -112,7 +113,7 @@ export const ToolsPanel = () => {
         <Separator className="my-3" />
         
         <Button variant="outline" size="sm" className="w-full text-xs">
-          <FrameIcon className="h-3 w-3 mr-1" />
+          <Frame className="h-3 w-3 mr-1" />
           Polaroid Frame
         </Button>
       </Card>
