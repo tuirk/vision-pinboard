@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
+import { useImageContext } from "@/contexts/ImageContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -15,7 +16,7 @@ import {
 import { toast } from "sonner";
 
 export const ToolsPanel = () => {
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const { uploadedImages, setUploadedImages, setDraggedImage } = useImageContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +27,7 @@ export const ToolsPanel = () => {
       );
       
       if (newImages.length > 0) {
-        setUploadedImages(prev => [...prev, ...newImages]);
+        setUploadedImages([...uploadedImages, ...newImages]);
         toast.success(`${newImages.length} image(s) uploaded successfully!`);
       } else {
         toast.error("Please upload valid image files only.");
@@ -39,10 +40,9 @@ export const ToolsPanel = () => {
   };
 
   const handleDragStart = (event: React.DragEvent, file: File) => {
-    event.dataTransfer.setData("application/json", JSON.stringify({
-      type: "image",
-      file: file
-    }));
+    console.log("Starting drag for file:", file.name);
+    setDraggedImage(file);
+    event.dataTransfer.setData("text/plain", "image-drag");
   };
 
   return (

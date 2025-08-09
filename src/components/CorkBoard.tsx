@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas, FabricImage } from "fabric";
+import { useImageContext } from "@/contexts/ImageContext";
 import { toast } from "sonner";
 
 export const CorkBoard = () => {
+  const { draggedImage, setDraggedImage } = useImageContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
@@ -50,18 +52,18 @@ export const CorkBoard = () => {
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {
     event.preventDefault();
+    console.log("Drop event triggered");
     
-    if (!fabricCanvas) return;
+    if (!fabricCanvas || !draggedImage) {
+      console.log("No canvas or dragged image available");
+      return;
+    }
 
     try {
-      const data = event.dataTransfer.getData("application/json");
-      const dropData = JSON.parse(data);
-
-      if (dropData.type === "image" && dropData.file) {
-        const file = dropData.file as File;
-        
-        // Create image URL
-        const imageUrl = URL.createObjectURL(file);
+      console.log("Processing image:", draggedImage.name);
+      
+      // Create image URL
+      const imageUrl = URL.createObjectURL(draggedImage);
         
         // Get drop position relative to canvas
         const rect = canvasRef.current?.getBoundingClientRect();
@@ -96,18 +98,23 @@ export const CorkBoard = () => {
           fabricCanvas.renderAll();
           
           toast.success("Image added to board!");
+          console.log("Image successfully added to canvas");
           
-          // Clean up object URL
+          // Clean up
           URL.revokeObjectURL(imageUrl);
+          setDraggedImage(null);
+          
         }).catch((error) => {
           console.error('Error loading image:', error);
           toast.error("Failed to add image to board");
           URL.revokeObjectURL(imageUrl);
+          setDraggedImage(null);
         });
-      }
+        
     } catch (error) {
       console.error('Error handling drop:', error);
       toast.error("Failed to process dropped item");
+      setDraggedImage(null);
     }
   };
 
