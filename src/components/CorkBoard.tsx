@@ -117,38 +117,26 @@ function reorderWithinLayerables(
   const pos = layerables.indexOf(target);
   if (pos === -1) return; // target not layerable
 
-  const indexOf = (o: any) => objs.indexOf(o);
-
+  // Use Fabric's simpler reordering methods to avoid moveTo complications
   if (op === 'forward') {
     if (pos >= layerables.length - 1) return; // already top among layerables
-    const neighborAbove = layerables[pos + 1];
-    const newIndex = indexOf(neighborAbove) + 1; // place just above neighbor
-    target.moveTo(newIndex);
+    canvas.bringObjectForward(target);
     return;
   }
 
   if (op === 'backward') {
     if (pos <= 0) return; // already bottom among layerables
-    const neighborBelow = layerables[pos - 1];
-    const newIndex = indexOf(neighborBelow); // place just below neighbor (before it in array)
-    target.moveTo(newIndex);
+    canvas.sendObjectBackwards(target);
     return;
   }
 
   if (op === 'front') {
-    if (pos >= layerables.length - 1) return; // already top among layerables
-    // topmost other layerable
-    const topOther = layerables[layerables.length - 1];
-    const newIndex = indexOf(topOther) + 1; // just above top layerable, below any non-layerables above
-    target.moveTo(newIndex);
+    canvas.bringObjectToFront(target);
     return;
   }
 
   if (op === 'back') {
-    if (pos <= 0) return; // already bottom among layerables
-    const bottomOther = layerables[0];
-    const newIndex = indexOf(bottomOther); // move below bottom layerable
-    target.moveTo(newIndex);
+    canvas.sendObjectToBack(target);
     return;
   }
 }
