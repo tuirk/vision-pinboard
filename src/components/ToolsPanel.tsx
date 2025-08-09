@@ -15,13 +15,18 @@ import {
   Square,
   Scissors,
   Frame,
-  Pin
+  Pin,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUp,
+  ChevronsDown,
+  Layers
 } from "lucide-react";
 import { toast } from "sonner";
 
 export const ToolsPanel = () => {
   const { uploadedImages, setUploadedImages, setDraggedImage, setDraggedPin } = useImageContext();
-  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction } = useEditorContext();
+  const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,6 +139,32 @@ export const ToolsPanel = () => {
           <Frame className="h-3 w-3 mr-1" />
           Polaroid Frame
         </Button>
+      </Card>
+
+      {/* Layering */}
+      <Card className="p-4 mb-6 border-panel-border">
+        <div className="flex items-center gap-2 mb-3">
+          <Layers className="h-4 w-4 text-primary" />
+          <h3 className="font-medium text-foreground">Layering</h3>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => reorderLayer('back')}>
+            <ChevronsDown className="h-3 w-3 mr-1" />
+            To Back
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => reorderLayer('backward')}>
+            <ArrowDown className="h-3 w-3 mr-1" />
+            Down
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => reorderLayer('forward')}>
+            <ArrowUp className="h-3 w-3 mr-1" />
+            Up
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => reorderLayer('front')}>
+            <ChevronsUp className="h-3 w-3 mr-1" />
+            To Front
+          </Button>
+        </div>
       </Card>
 
       {/* Pins */}

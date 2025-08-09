@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control, Ellipse, Triangle } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
-import { useEditorContext, ShapeType, PinColor } from "@/contexts/EditorContext";
+import { useEditorContext, ShapeType, PinColor, ReorderOp } from "@/contexts/EditorContext";
 import { toast } from "sonner";
 
 // Helper: delete control for objects
@@ -109,7 +109,7 @@ const PIN_COLORS: Record<PinColor, string> = {
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage, draggedPin, setDraggedPin } = useImageContext();
-  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction } = useEditorContext();
+  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
@@ -446,7 +446,37 @@ export const CorkBoard = () => {
     setStartFreeCut(startFreeCut);
     setApplyPolaroidFrame(applyPolaroidFrame);
     setPinAction(pinAction);
-  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction]);
+
+    const reorderLayer = (op: ReorderOp) => {
+      const obj = fabricCanvas.getActiveObject();
+      if (!obj) {
+        toast.error('Select an item to change layer.');
+        return;
+      }
+      const objects = fabricCanvas.getObjects();
+      const idx = objects.indexOf(obj);
+      if (idx === -1) return;
+      let newIndex = idx;
+      switch (op) {
+        case 'forward':
+          newIndex = Math.min(idx + 1, objects.length - 1);
+          break;
+        case 'backward':
+          newIndex = Math.max(idx - 1, 0);
+          break;
+        case 'front':
+          newIndex = objects.length - 1;
+          break;
+        case 'back':
+          newIndex = 0;
+          break;
+      }
+      (obj as any).moveTo(newIndex);
+      fabricCanvas.requestRenderAll();
+    };
+
+    setReorderLayer(reorderLayer);
+  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer]);
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {

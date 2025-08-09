@@ -2,11 +2,13 @@ import { createContext, useContext, useState, ReactNode, useCallback, useMemo } 
 
 export type ShapeType = "circle" | "square" | "heart";
 export type PinColor = "red" | "blue" | "green" | "yellow" | "purple";
+export type ReorderOp = "forward" | "backward" | "front" | "back";
 
 type ApplyShapeFn = (shape: ShapeType) => void;
 type StartFreeCutFn = () => void;
 type ApplyPolaroidFn = () => void;
 type PinActionFn = (color: PinColor) => void;
+type ReorderLayerFn = (op: ReorderOp) => void;
 
 interface EditorContextType {
   applyShapeCrop: ApplyShapeFn;
@@ -17,12 +19,15 @@ interface EditorContextType {
   setApplyPolaroidFrame: (fn: ApplyPolaroidFn) => void;
   pinAction: PinActionFn;
   setPinAction: (fn: PinActionFn) => void;
+  reorderLayer: ReorderLayerFn;
+  setReorderLayer: (fn: ReorderLayerFn) => void;
 }
 
 const noop: ApplyShapeFn = () => {};
 const noopVoid: StartFreeCutFn = () => {};
 const noopPolaroid: ApplyPolaroidFn = () => {};
 const noopPinAction: PinActionFn = () => {};
+const noopReorder: ReorderLayerFn = () => {};
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
@@ -37,6 +42,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const [startFreeCutFn, setStartFreeCutFn] = useState<StartFreeCutFn>(() => noopVoid);
   const [applyPolaroidFrameFn, setApplyPolaroidFrameFn] = useState<ApplyPolaroidFn>(() => noopPolaroid);
   const [pinActionFn, setPinActionFn] = useState<PinActionFn>(() => noopPinAction);
+  const [reorderLayerFn, setReorderLayerFn] = useState<ReorderLayerFn>(() => noopReorder);
 
   const applyShapeCrop = useCallback((shape: ShapeType) => applyShapeCropFn(shape), [applyShapeCropFn]);
   const setApplyShapeCrop = useCallback((fn: ApplyShapeFn) => setApplyShapeCropFn(() => fn), []);
@@ -46,6 +52,8 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const setApplyPolaroidFrame = useCallback((fn: ApplyPolaroidFn) => setApplyPolaroidFrameFn(() => fn), []);
   const pinAction = useCallback((color: PinColor) => pinActionFn(color), [pinActionFn]);
   const setPinAction = useCallback((fn: PinActionFn) => setPinActionFn(() => fn), []);
+  const reorderLayer = useCallback((op: ReorderOp) => reorderLayerFn(op), [reorderLayerFn]);
+  const setReorderLayer = useCallback((fn: ReorderLayerFn) => setReorderLayerFn(() => fn), []);
 
   const value = useMemo(
     () => ({
@@ -57,8 +65,10 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       setApplyPolaroidFrame,
       pinAction,
       setPinAction,
+      reorderLayer,
+      setReorderLayer,
     }),
-    [applyShapeCrop, setApplyShapeCrop, startFreeCut, setStartFreeCut, applyPolaroidFrame, setApplyPolaroidFrame, pinAction, setPinAction]
+    [applyShapeCrop, setApplyShapeCrop, startFreeCut, setStartFreeCut, applyPolaroidFrame, setApplyPolaroidFrame, pinAction, setPinAction, reorderLayer, setReorderLayer]
   );
 
   return (
