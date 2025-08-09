@@ -13,7 +13,8 @@ import {
   Circle, 
   Square,
   Scissors,
-  Frame
+  Frame,
+  Pin
 } from "lucide-react";
 import { toast } from "sonner";
 

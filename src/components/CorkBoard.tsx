@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control, Ellipse, Triangle } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
-import { useEditorContext, ShapeType } from "@/contexts/EditorContext";
+import { useEditorContext, ShapeType, PinColor } from "@/contexts/EditorContext";
 import { toast } from "sonner";
 
 // Helper: delete control for objects
@@ -48,9 +48,18 @@ const attachDeleteControl = (obj: any) => {
   obj.controls.deleteControl = createDeleteControl();
 };
 
+const PIN_COLORS: Record<PinColor, string> = {
+  red: '#ef4444',
+  blue: '#3b82f6',
+  green: '#22c55e',
+  yellow: '#eab308',
+  purple: '#a855f7',
+};
+
+
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage } = useImageContext();
-  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame } = useEditorContext();
+  const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
@@ -338,10 +347,56 @@ export const CorkBoard = () => {
       toast.success('Polaroid frame added');
     };
 
+    const pinAction = (color: PinColor) => {
+      const colorHex = PIN_COLORS[color];
+      const active = fabricCanvas.getActiveObject();
+
+      // If a pin is selected, recolor its plastic parts
+      if (active && active.type === 'group' && (active as any).name === 'pin') {
+        const grp = active as Group;
+        grp.getObjects().forEach((o) => {
+          if ((o as any).name === 'plastic') {
+            o.set({ fill: colorHex });
+          }
+        });
+        fabricCanvas.requestRenderAll();
+        toast.success('Pin color updated');
+        return;
+      }
+
+      // Otherwise, add a new pin in the chosen color at canvas center
+      const head = new Circle({ radius: 10, top: -28, fill: colorHex, originX: 'center', originY: 'center' } as any);
+      (head as any).name = 'plastic';
+      const neck = new Rect({ width: 8, height: 24, rx: 4, ry: 4, top: -8, fill: colorHex, originX: 'center', originY: 'center' } as any);
+      (neck as any).name = 'plastic';
+      const base = new Ellipse({ rx: 16, ry: 10, top: 6, fill: colorHex, originX: 'center', originY: 'center' } as any);
+      (base as any).name = 'plastic';
+      const spike = new Triangle({ width: 6, height: 22, top: 22, originX: 'center', originY: 'center', angle: 180, fill: '#c0c0c0' });
+
+      const centerX = fabricCanvas.getWidth() / 2;
+      const centerY = fabricCanvas.getHeight() / 2;
+
+      const pinGroup = new Group([spike, base, neck, head], {
+        left: centerX,
+        top: centerY,
+        originX: 'center',
+        originY: 'center',
+        shadow: new Shadow({ color: 'rgba(0,0,0,0.25)', blur: 8, offsetX: 2, offsetY: 4 }),
+      } as any);
+      (pinGroup as any).name = 'pin';
+
+      fabricCanvas.add(pinGroup);
+      attachDeleteControl(pinGroup);
+      fabricCanvas.setActiveObject(pinGroup as any);
+      fabricCanvas.requestRenderAll();
+      toast.success('Pin added');
+    };
+
     setApplyShapeCrop(applyFn);
     setStartFreeCut(startFreeCut);
     setApplyPolaroidFrame(applyPolaroidFrame);
-  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame]);
+    setPinAction(pinAction);
+  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction]);
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {
