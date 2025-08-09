@@ -58,7 +58,10 @@ const createLayerControl = (dir: 'up' | 'down') =>
         const idx = objects.indexOf(target);
         if (idx !== -1) {
           const newIndex = dir === 'up' ? Math.min(idx + 1, objects.length - 1) : Math.max(idx - 1, 0);
-          target.moveTo(newIndex);
+          canvas.remove(target);
+          // @ts-ignore fabric v6: insertAt exists
+          (canvas as any).insertAt(target, newIndex, true);
+          canvas.setActiveObject(target);
         }
         canvas.requestRenderAll();
       }
