@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, FabricImage } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
+import { useEditorContext, ShapeType } from "@/contexts/EditorContext";
 import { toast } from "sonner";
 
 export const CorkBoard = () => {
   const { draggedImage, setDraggedImage } = useImageContext();
+  const { setApplyShapeCrop } = useEditorContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
@@ -48,6 +50,72 @@ export const CorkBoard = () => {
       canvas.dispose();
     };
   }, []);
+
+  // Register editor actions
+  useEffect(() => {
+    if (!fabricCanvas) return;
+
+    const applyFn = (shape: ShapeType) => {
+      const obj = fabricCanvas.getActiveObject();
+      if (!obj || obj.type !== 'image') {
+        toast.error('Select an image on the board to apply a crop.');
+        return;
+      }
+
+      const img = obj as FabricImage;
+      const w = img.width ?? 0;
+      const h = img.height ?? 0;
+      const size = Math.min(w, h);
+
+      let clip: Circle | Rect | Path | undefined;
+
+      switch (shape) {
+        case 'circle':
+          clip = new Circle({
+            radius: size / 2,
+            left: 0,
+            top: 0,
+            originX: 'center',
+            originY: 'center',
+          });
+          break;
+        case 'square':
+          clip = new Rect({
+            width: size,
+            height: size,
+            rx: 8,
+            ry: 8,
+            left: 0,
+            top: 0,
+            originX: 'center',
+            originY: 'center',
+          });
+          break;
+        case 'heart': {
+          const pathStr = "M 50 15 C 35 0 0 20 0 50 C 0 80 25 95 50 110 C 75 95 100 80 100 50 C 100 20 65 0 50 15 Z";
+          const heart = new Path(pathStr, {
+            left: 0,
+            top: 0,
+            originX: 'center',
+            originY: 'center',
+            fill: 'black',
+          });
+          heart.scaleX = size / 100;
+          heart.scaleY = size / 100;
+          clip = heart;
+          break;
+        }
+      }
+
+      if (clip) {
+        img.set({ clipPath: clip });
+        fabricCanvas.requestRenderAll();
+        toast.success('Crop applied');
+      }
+    };
+
+    setApplyShapeCrop(applyFn);
+  }, [fabricCanvas, setApplyShapeCrop]);
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {

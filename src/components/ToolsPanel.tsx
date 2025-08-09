@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useImageContext } from "@/contexts/ImageContext";
+import { useEditorContext } from "@/contexts/EditorContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -11,12 +12,13 @@ import {
   Circle, 
   Square,
   Scissors,
-  FrameIcon
+  Frame
 } from "lucide-react";
 import { toast } from "sonner";
 
 export const ToolsPanel = () => {
   const { uploadedImages, setUploadedImages, setDraggedImage } = useImageContext();
+  const { applyShapeCrop } = useEditorContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,15 +91,15 @@ export const ToolsPanel = () => {
         </div>
         
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" size="sm" className="text-xs">
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => applyShapeCrop("circle")}>
             <Circle className="h-3 w-3 mr-1" />
             Circle
           </Button>
-          <Button variant="outline" size="sm" className="text-xs">
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => applyShapeCrop("square")}>
             <Square className="h-3 w-3 mr-1" />
             Square
           </Button>
-          <Button variant="outline" size="sm" className="text-xs">
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => applyShapeCrop("heart")}>
             <Heart className="h-3 w-3 mr-1" />
             Heart
           </Button>
