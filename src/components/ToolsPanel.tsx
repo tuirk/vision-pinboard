@@ -46,8 +46,12 @@ export const ToolsPanel = () => {
   const { applyShapeCrop, startFreeCut, applyPolaroidFrame, pinAction, reorderLayer, addText, exportSelected } = useEditorContext();
 =======
   const { uploadedImages, setUploadedImages, setDraggedImage } = useImageContext();
+<<<<<<< HEAD
   const { applyShapeCrop } = useEditorContext();
 >>>>>>> d453ff0 (Add image cropping shapes)
+=======
+  const { applyShapeCrop, startFreeCut } = useEditorContext();
+>>>>>>> ea03ed0 (Add freecut function)
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [textContent, setTextContent] = useState("");
 

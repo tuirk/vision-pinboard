@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon, Point, util, Group, Shadow, Control, Ellipse, Triangle, FabricText } from "fabric";
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType, PinColor, ReorderOp } from "@/contexts/EditorContext";
 =======
 import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path } from "fabric";
+=======
+import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Polygon } from "fabric";
+>>>>>>> ea03ed0 (Add freecut function)
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType } from "@/contexts/EditorContext";
 >>>>>>> d453ff0 (Add image cropping shapes)
@@ -161,8 +165,12 @@ export const CorkBoard = () => {
   const { setApplyShapeCrop, setStartFreeCut, setApplyPolaroidFrame, setPinAction, setReorderLayer, setAddText, setExportSelected } = useEditorContext();
 =======
   const { draggedImage, setDraggedImage } = useImageContext();
+<<<<<<< HEAD
   const { setApplyShapeCrop } = useEditorContext();
 >>>>>>> d453ff0 (Add image cropping shapes)
+=======
+  const { setApplyShapeCrop, setStartFreeCut } = useEditorContext();
+>>>>>>> ea03ed0 (Add freecut function)
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<any[]>([]);
@@ -329,6 +337,9 @@ export const CorkBoard = () => {
     };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ea03ed0 (Add freecut function)
     const startFreeCut = () => {
       const obj = fabricCanvas.getActiveObject();
       if (!obj || obj.type !== 'image') {
@@ -378,7 +389,10 @@ export const CorkBoard = () => {
         fabricCanvas.off('mouse:move', onMouseMove);
         window.removeEventListener('keydown', onKeyDown);
         fabricCanvas.selection = true;
+<<<<<<< HEAD
         fabricCanvas.skipTargetFind = false;
+=======
+>>>>>>> ea03ed0 (Add freecut function)
         if (tempPolyline) {
           fabricCanvas.remove(tempPolyline);
           tempPolyline = null;
@@ -396,6 +410,7 @@ export const CorkBoard = () => {
           fabricCanvas.remove(tempPolyline);
           tempPolyline = null;
         }
+<<<<<<< HEAD
         // Convert canvas points to image-local coords and center them to image center
         const inv = util.invertTransform(img.calcTransformMatrix());
         const imgW = img.width ?? 0;
@@ -417,6 +432,16 @@ export const CorkBoard = () => {
           originY: 'center',
         });
 
+=======
+        const polygon = new Polygon(points, {
+          fill: 'black',
+          selectable: false,
+          evented: false,
+        });
+        // Use absolute positioning so we don't need to transform into image space
+        // fabric supports absolute-positioned clipPath for canvas coords
+        polygon.absolutePositioned = true;
+>>>>>>> ea03ed0 (Add freecut function)
         img.set({ clipPath: polygon });
         fabricCanvas.requestRenderAll();
         toast.success('Free cut applied');
@@ -433,12 +458,16 @@ export const CorkBoard = () => {
       };
 
       fabricCanvas.selection = false;
+<<<<<<< HEAD
       fabricCanvas.skipTargetFind = true;
+=======
+>>>>>>> ea03ed0 (Add freecut function)
       fabricCanvas.on('mouse:down', onMouseDown);
       fabricCanvas.on('mouse:move', onMouseMove);
       window.addEventListener('keydown', onKeyDown);
     };
 
+<<<<<<< HEAD
     const applyPolaroidFrame = () => {
       const obj = fabricCanvas.getActiveObject();
       if (!obj || obj.type !== 'image') {
@@ -720,6 +749,11 @@ export const CorkBoard = () => {
     setApplyShapeCrop(applyFn);
   }, [fabricCanvas, setApplyShapeCrop]);
 >>>>>>> d453ff0 (Add image cropping shapes)
+=======
+    setApplyShapeCrop(applyFn);
+    setStartFreeCut(startFreeCut);
+  }, [fabricCanvas, setApplyShapeCrop, setStartFreeCut]);
+>>>>>>> ea03ed0 (Add freecut function)
 
   // Handle drop events
   const handleDrop = async (event: React.DragEvent) => {
