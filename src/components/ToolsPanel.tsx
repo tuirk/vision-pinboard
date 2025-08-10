@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Upload, 
   Image as ImageIcon, 
@@ -293,23 +294,25 @@ export const ToolsPanel = () => {
             </span>
           </div>
           
-          <div className="grid grid-cols-2 gap-2">
-            {uploadedImages.map((file, index) => (
-              <div
-                key={index}
-                draggable
-                onDragStart={(e) => handleDragStart(e, file)}
-                className="relative aspect-square cursor-grab active:cursor-grabbing group"
-              >
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  className="w-full h-full object-cover rounded-md border border-panel-border shadow-sm group-hover:shadow-md transition-shadow"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-md" />
-              </div>
-            ))}
-          </div>
+          <ScrollArea className="max-h-64">
+            <div className="grid grid-cols-2 gap-2 pr-3">
+              {uploadedImages.map((file, index) => (
+                <div
+                  key={index}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, file)}
+                  className="relative aspect-square cursor-grab active:cursor-grabbing group"
+                >
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    className="w-full h-full object-cover rounded-md border border-panel-border shadow-sm group-hover:shadow-md transition-shadow"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-md" />
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
           
           <p className="text-xs text-muted-foreground mt-3 text-center">
             Drag images to your board to get started
