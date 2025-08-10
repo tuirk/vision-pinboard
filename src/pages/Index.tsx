@@ -3,14 +3,14 @@ import { VisionBoard } from "@/components/VisionBoard";
 import { Auth } from "./Auth";
 
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showBoard, setShowBoard] = useState(false);
 
-  const handleAuthSuccess = () => {
-    setIsAuthenticated(true);
+  const handleStart = () => {
+    setShowBoard(true);
   };
 
-  if (!isAuthenticated) {
-    return <Auth onAuthSuccess={handleAuthSuccess} />;
+  if (!showBoard) {
+    return <Auth onStart={handleStart} />;
   }
 
   return <VisionBoard />;

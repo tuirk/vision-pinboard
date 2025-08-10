@@ -1,45 +1,17 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle, Shield, Zap } from "lucide-react";
 import welcomeImage from "@/assets/welcome-image.jpg";
 
 interface AuthProps {
-  onAuthSuccess: () => void;
+  onStart: () => void;
 }
 
-export const Auth = ({ onAuthSuccess }: AuthProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    // Dummy authentication - just simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-      onAuthSuccess();
-    }, 1000);
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    // Dummy authentication - just simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-      onAuthSuccess();
-    }, 1000);
-  };
+export const Auth = ({ onStart }: AuthProps) => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Auth Form (1/3) */}
+      {/* Left side - Info & CTA (1/3) */}
       <div className="w-1/3 flex items-center justify-center p-8 bg-background">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
@@ -48,73 +20,36 @@ export const Auth = ({ onAuthSuccess }: AuthProps) => {
               Create and organize your ideas visually
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <Shield className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-foreground">Privacy First</h3>
+                  <p className="text-sm text-muted-foreground">We don't store anything on our servers. Your data stays in your browser.</p>
+                </div>
+              </div>
               
-              <TabsContent value="signin" className="space-y-4">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing In..." : "Sign In"}
-                  </Button>
-                </form>
-              </TabsContent>
+              <div className="flex items-start gap-3">
+                <Zap className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-foreground">No Account Needed</h3>
+                  <p className="text-sm text-muted-foreground">Start creating immediately. No sign-ups, no passwords, no hassle.</p>
+                </div>
+              </div>
               
-              <TabsContent value="signup" className="space-y-4">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="Create a password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating Account..." : "Sign Up"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-foreground">Browser Cached</h3>
+                  <p className="text-sm text-muted-foreground">Your work is saved locally. Clear your browser data and it's gone - so export regularly!</p>
+                </div>
+              </div>
+            </div>
+            
+            <Button onClick={onStart} className="w-full" size="lg">
+              Start Free
+            </Button>
           </CardContent>
         </Card>
       </div>
