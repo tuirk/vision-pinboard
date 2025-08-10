@@ -914,7 +914,7 @@ export const CorkBoard = () => {
               Start Creating Your Vision Board
             </h3>
             <p className="text-cork-medium">
-              Drag images from the left panel or add text to this cork board
+              Drag images from the panel or add text to start building your ideas
             </p>
           </div>
         </div>
