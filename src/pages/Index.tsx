@@ -9,11 +9,15 @@ const Index = () => {
     setShowBoard(true);
   };
 
+  const handleGoHome = () => {
+    setShowBoard(false);
+  };
+
   if (!showBoard) {
     return <Auth onStart={handleStart} />;
   }
 
-  return <VisionBoard />;
+  return <VisionBoard onGoHome={handleGoHome} />;
 };
 
 export default Index;
