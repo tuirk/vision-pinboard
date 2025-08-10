@@ -1,5 +1,6 @@
-import { useState, createContext, useContext, ReactNode } from "react";
+import { useState, createContext, useContext, ReactNode, useEffect } from "react";
 import type { PinColor } from "@/contexts/EditorContext";
+import { saveUploadedImages, loadUploadedImages } from "@/lib/localStorage";
 
 interface ImageContextType {
   uploadedImages: File[];
@@ -25,10 +26,33 @@ export const ImageProvider = ({ children }: { children: ReactNode }) => {
   const [draggedImage, setDraggedImage] = useState<File | null>(null);
   const [draggedPin, setDraggedPin] = useState<PinColor | null>(null);
 
+  // Load images from localStorage on mount
+  useEffect(() => {
+    const loadImages = async () => {
+      const storedImages = await loadUploadedImages();
+      if (storedImages.length > 0) {
+        setUploadedImages(storedImages);
+      }
+    };
+    loadImages();
+  }, []);
+
+  // Save images to localStorage whenever they change
+  useEffect(() => {
+    if (uploadedImages.length > 0) {
+      saveUploadedImages(uploadedImages);
+    }
+  }, [uploadedImages]);
+
+  const handleSetUploadedImages = (images: File[]) => {
+    setUploadedImages(images);
+    // Auto-save will happen via useEffect
+  };
+
   return (
     <ImageContext.Provider value={{
       uploadedImages,
-      setUploadedImages,
+      setUploadedImages: handleSetUploadedImages,
       draggedImage,
       setDraggedImage,
       draggedPin,

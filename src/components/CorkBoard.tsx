@@ -3,6 +3,7 @@ import { Canvas as FabricCanvas, FabricImage, Circle, Rect, Path, Polyline, Poly
 import { useImageContext } from "@/contexts/ImageContext";
 import { useEditorContext, ShapeType, PinColor, ReorderOp } from "@/contexts/EditorContext";
 import { toast } from "sonner";
+import { saveCanvasState, loadCanvasState } from "@/lib/localStorage";
 
 // Helper: delete control for objects
 const createDeleteControl = () =>
@@ -220,7 +221,43 @@ export const CorkBoard = () => {
       canvas.renderAll();
     });
 
+    // Load canvas state from localStorage
+    const loadCanvasData = async () => {
+      const savedState = loadCanvasState();
+      if (savedState) {
+        try {
+          await canvas.loadFromJSON(savedState);
+          // Reattach controls to all objects
+          canvas.getObjects().forEach(obj => {
+            attachControls(obj);
+          });
+          canvas.renderAll();
+          toast.success('Canvas restored from previous session');
+        } catch (error) {
+          console.warn('Failed to load canvas state:', error);
+        }
+      }
+    };
+
+    // Auto-save canvas state on changes
+    const autoSave = () => {
+      try {
+        const canvasData = canvas.toJSON(); // Fixed: removed invalid parameter
+        saveCanvasState(JSON.stringify(canvasData));
+      } catch (error) {
+        console.warn('Failed to save canvas state:', error);
+      }
+    };
+
+    // Save on object modifications
+    canvas.on('object:added', autoSave);
+    canvas.on('object:removed', autoSave);
+    canvas.on('object:modified', autoSave);
+
     setFabricCanvas(canvas);
+
+    // Load saved state after canvas is initialized
+    setTimeout(loadCanvasData, 100);
 
     // Handle window resize and panel changes
     const handleResize = () => {
